@@ -1,5 +1,6 @@
 require "ablab/version"
 require "ablab/controller"
+require "ablab/store"
 
 module ABLab
   module ModuleMethods
@@ -12,6 +13,19 @@ module ABLab
     def experiment(name, &block)
       @experiments ||= {}
       @experiments[name] = Experiment.new(name, &block)
+    end
+
+    def store(type, *args)
+      if type.is_a? Class
+        @tracker = Class.new(*args)
+      else
+        class_name = type.to_s.split('_').map(&:capitalize).join
+        @tracker = ABLab::Store.const_get(class_name).new(*args)
+      end
+    end
+
+    def tracker
+      @tracker ||= ABLab::Store::Memory.new
     end
   end
 
@@ -55,11 +69,11 @@ module ABLab
     end
 
     def track_view!
-      ABLab.track_view!(experiment.name, bucket)
+      ABLab.tracker.track_view!(experiment.name, bucket)
     end
 
-    def track_goal!
-      ABLab.track_goal!(experiment.name, bucket)
+    def track_conversion!
+      ABLab.tracker.track_conversion!(experiment.name, bucket)
     end
   end
 

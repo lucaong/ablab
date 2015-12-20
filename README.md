@@ -55,11 +55,11 @@ end
 
 # In app controllers/views code
 
-ab_test(:product_page).in_bucket?(:a) # true/false
-ab_test(:product_page).bucket         # => :a/:b
+experiment(:product_page).in_bucket?(:a) # => true or false
+experiment(:product_page).bucket         # => :a or :b
 
-ab_test(:product_page).track_view!
-ab_test(:product_page).track_goal!
+experiment(:product_page).track_view!
+experiment(:product_page).track_conversion!
 ```
 
 

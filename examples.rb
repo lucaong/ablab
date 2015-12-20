@@ -1,4 +1,6 @@
 ABLab.setup do
+  store :redis, host: 'localhost', port: 6379
+
   experiment :product_page do
     description "Experiments on the product page"
 
@@ -27,8 +29,8 @@ end
 
 # In app controllers/views code
 
-ab_test(:product_page).in_bucket?(:a) # true/false
-ab_test(:product_page).bucket         # => :a/:b
+experiment(:product_page).in_bucket?(:a) # => true or false
+experiment(:product_page).bucket         # => :a or :b
 
-ab_test(:product_page).track_view!
-ab_test(:product_page).track_goal!
+experiment(:product_page).track_view!
+experiment(:product_page).track_conversion!

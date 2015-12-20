@@ -1,18 +1,38 @@
 require 'spec_helper'
 
 describe ABLab do
+  let(:ab) do
+    Module.new { extend ABLab::ModuleMethods }
+  end
+
   it 'has a version number' do
     expect(ABLab::VERSION).not_to be nil
   end
 
   describe '.experiment' do
-    let(:ab) do
-      Module.new { extend ABLab::ModuleMethods }
-    end
-
     it 'creates an experiment' do
       ab.experiment :foo_bar do; end
       expect(ab.experiments[:foo_bar]).to be_a(ABLab::Experiment)
+    end
+  end
+
+  describe '.tracker' do
+    around do |example|
+      begin
+        ABLab::Store::Dummy = Class.new
+        example.run
+      ensure
+        ABLab::Store.send(:remove_const, :Dummy)
+      end
+    end
+
+    it 'returns a ABLab::Store::Memory instance if store was never set' do
+      expect(ab.tracker).to be_a(ABLab::Store::Memory)
+    end
+
+    it 'returns the store if it was set' do
+      ab.store :dummy
+      expect(ab.tracker).to be_a(ABLab::Store::Dummy)
     end
   end
 
@@ -37,7 +57,7 @@ describe ABLab do
     end
   end
 
-  describe ABLab::Experiment do
+  describe ABLab::Run do
     let(:experiment) do
       ABLab::Experiment.new(:foo) do
         bucket :a
