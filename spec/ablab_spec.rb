@@ -53,6 +53,40 @@ describe ABLab do
         experiment.bucket :a, description: 'foo bar baz'
         expect(experiment.buckets.last).to be_a(ABLab::Bucket)
         expect(experiment.buckets.last.name).to eq(:a)
+        expect(experiment.buckets.last.description).to eq('foo bar baz')
+      end
+    end
+
+    describe '.results' do
+      it 'returns the results of the experiment' do
+        experiment.bucket :a, control: true
+        experiment.bucket :b
+        allow(ABLab.tracker).to receive(:views) do |_, bucket|
+          { a: 182, b: 188 }[bucket]
+        end
+        allow(ABLab.tracker).to receive(:conversions) do |_, bucket|
+          { a: 35, b: 61 }[bucket]
+        end
+        results = experiment.results
+        expect(results.first).to eq({
+          views:       182,
+          conversions: 35,
+          control:     true
+        })
+        expect(results.last).to eq({
+          views:       188,
+          conversions: 61,
+          control:     false,
+          z_score:     2.9410157224928595
+        })
+      end
+
+      it 'raises if there is no control group' do
+        experiment.bucket :a
+        experiment.bucket :b
+        expect {
+          experiment.results
+        }.to raise_error ABLab::Result::NoControlGroup
       end
     end
   end
