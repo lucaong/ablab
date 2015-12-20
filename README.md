@@ -1,7 +1,7 @@
 # ABLab
 
-A minimal library for performing AB-tests and checking their statistical
-significance.
+A minimal library for performing AB-tests in Rails applications and checking
+their statistical significance.
 
 
 ## Installation
@@ -27,17 +27,19 @@ Or install it yourself as:
 # In `initializers/ablab.rb`
 
 ABLab.setup do
+  store :redis, host: 'localhost', port: 6379
+
   experiment :product_page do
     description "Experiments on the product page"
 
-    bucket :a, description: "control group"
+    bucket :a, control: true, description: "control group"
     bucket :b, description: "show more products from the shop at the top"
   end
 
   experiment :search do
     description "Search experiments"
 
-    bucket :a, description: "control group"
+    bucket :a, control: true, description: "control group"
     bucket :b, description: "boost CTR"
     bucket :c, description: "boost GMV"
   end
@@ -60,6 +62,12 @@ experiment(:product_page).bucket         # => :a or :b
 
 experiment(:product_page).track_view!
 experiment(:product_page).track_conversion!
+
+
+# Results of the experiment
+ABTest.experiments.each do |experiment|
+  puts "#{experiment.name}: #{experiment.results.inspect}"
+end
 ```
 
 
