@@ -26,7 +26,7 @@ describe ABLab::Helper do
       def self.helper_method(_); end
     end
     expect(klass).to receive(:helper_method).with :experiment
-    expect(klass).to receive(:helper_method).with :user_id_for_experiments
+    expect(klass).to receive(:helper_method).with :session_id_for_experiments
     klass.send(:include, ABLab::Helper)
   end
 

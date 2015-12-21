@@ -15,10 +15,10 @@ module ABLab
         raise "No experiment with name #{name}"
       end
       @experiments[name] ||=
-        ABLab.experiments[name].run(user_id_for_experiments)
+        ABLab.experiments[name].run(session_id_for_experiments)
     end
 
-    def user_id_for_experiments
+    def session_id_for_experiments
       env['rack.session'].id
     end
   end

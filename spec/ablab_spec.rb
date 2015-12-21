@@ -74,19 +74,29 @@ describe ABLab do
       it 'returns the results of the experiment' do
         experiment.group :x
         allow(ABLab.tracker).to receive(:views) do |_, group|
+          { control: 201, x: 238 }[group]
+        end
+        allow(ABLab.tracker).to receive(:sessions) do |_, group|
           { control: 182, x: 188 }[group]
+        end
+        allow(ABLab.tracker).to receive(:successes) do |_, group|
+          { control: 38, x: 70 }[group]
         end
         allow(ABLab.tracker).to receive(:conversions) do |_, group|
           { control: 35, x: 61 }[group]
         end
         results = experiment.results
         expect(results.first).to eq({
-          views:       182,
+          views:       201,
+          sessions:    182,
+          successes:   38,
           conversions: 35,
           control:     true
         })
         expect(results.last).to eq({
-          views:       188,
+          views:       238,
+          sessions:    188,
+          successes:   70,
           conversions: 61,
           control:     false,
           z_score:     2.9410157224928595
@@ -104,12 +114,15 @@ describe ABLab do
     end
 
     it 'gets assigned to the right group' do
-      c = ABLab::Run.new(experiment, 0)
-      a = ABLab::Run.new(experiment, 334)
-      b = ABLab::Run.new(experiment, 999)
-      expect(c).to be_in_group(:control)
-      expect(a).to be_in_group(:a)
-      expect(b).to be_in_group(:b)
+      run = ABLab::Run.new(experiment, 0)
+      allow(run).to receive(:draw).and_return 0
+      expect(run).to be_in_group(:control)
+      run = ABLab::Run.new(experiment, 0)
+      allow(run).to receive(:draw).and_return 334
+      expect(run).to be_in_group(:a)
+      run = ABLab::Run.new(experiment, 0)
+      allow(run).to receive(:draw).and_return 999
+      expect(run).to be_in_group(:b)
     end
   end
 end

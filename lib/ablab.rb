@@ -56,19 +56,17 @@ module ABLab
       @result.data
     end
 
-    def run(uid)
-      draw = Random.new(uid.hash * name.hash).rand(1000)
-      Run.new(self, draw)
+    def run(session_id)
+      Run.new(self, session_id)
     end
   end
 
   class Run
-    attr_reader :group, :experiment
+    attr_reader :experiment, :session_id
 
-    def initialize(experiment, draw)
-      idx         = (draw / (1000.0 / experiment.groups.size)).floor
+    def initialize(experiment, session_id)
+      @experiment, @session_id = experiment, session_id
       @experiment = experiment
-      @group      = experiment.groups[idx].name
     end
 
     def in_group?(name)
@@ -76,11 +74,21 @@ module ABLab
     end
 
     def track_view!
-      ABLab.tracker.track_view!(experiment.name, group)
+      ABLab.tracker.track_view!(experiment.name, group, session_id)
     end
 
-    def track_conversion!
-      ABLab.tracker.track_conversion!(experiment.name, group)
+    def track_success!
+      ABLab.tracker.track_success!(experiment.name, group, session_id)
+    end
+
+    def group
+      return @group unless @group.nil?
+      idx = (draw / (1000.0 / experiment.groups.size)).floor
+      @group = experiment.groups[idx].name
+    end
+
+    def draw
+      Random.new(session_id.hash * experiment.name.hash).rand(1000)
     end
   end
 
@@ -100,27 +108,26 @@ module ABLab
     end
 
     def data
-      c_views, c_conv = views_and_conversions(control)
+      counts_c = counts(control)
       groups.map do |group|
         if group == control
-          next { views: c_views, conversions: c_conv, control: true }
+          next counts_c.merge(control: true)
         end
-        views, conv = views_and_conversions(group)
-        z = z_score(views, conv, c_views, c_conv)
-        { views: views, conversions: conv, z_score: z, control: false }
+        counts = counts(group)
+        z = z_score(counts[:sessions], counts[:conversions],
+                    counts_c[:sessions], counts_c[:conversions])
+        counts.merge(z_score: z, control: false)
       end
     end
 
-    private def views_and_conversions(group)
-      views       = ABLab.tracker.views(name, group.name)
-      conversions = ABLab.tracker.conversions(name, group.name)
-      [views, conversions]
+    private def counts(group)
+      ABLab.tracker.counts(name, group.name)
     end
 
-    private def z_score(views, conv, c_views, c_conv)
-      p  = conv.to_f / views
-      pc = c_conv.to_f / c_views
-      (p - pc) / Math.sqrt((p*(1 - p) / views) + (pc*(1 - pc) / c_views))
+    private def z_score(s, c, sc, cc)
+      p  = [c.to_f / s, 1.0].min
+      pc = [cc.to_f / sc, 1.0].min
+      (p - pc) / Math.sqrt((p*(1 - p) / s) + (pc*(1 - pc) / sc))
     end
   end
 end

@@ -2,18 +2,24 @@ require 'spec_helper'
 require 'ablab/store/store_examples'
 
 describe ABLab::Store::Redis do
-  around do |example|
-    begin
-      example.run
-    ensure
-      redis = ::Redis.new
-      keys  = redis.keys('ablab:*')
-      redis.pipelined do
-        keys.each { |key| redis.del(key) }
-      end
+  def cleanup
+    redis = ::Redis.new(db: 2)
+    keys  = redis.keys('ablabtest:*')
+    redis.pipelined do
+      keys.each { |key| redis.del(key) }
     end
   end
 
-  include_examples 'store', ABLab::Store::Redis.new
+  around do |example|
+    begin
+      cleanup
+      example.run
+    ensure
+      cleanup
+    end
+  end
+
+  let(:store) { ABLab::Store::Redis.new(db: 2, key_prefix: 'ablabtest') }
+  include_examples 'store'
 end
 
