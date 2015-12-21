@@ -1,5 +1,5 @@
 require "ablab/version"
-require "ablab/controller"
+require "ablab/helper"
 require "ablab/store"
 
 module ABLab
