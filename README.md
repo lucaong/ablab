@@ -32,16 +32,16 @@ ABLab.setup do
   experiment :product_page do
     description "Experiments on the product page"
 
-    bucket :a, control: true, description: "control group"
-    bucket :b, description: "show more products from the shop at the top"
+    group :a, control: true, description: "control group"
+    group :b, description: "show more products from the shop at the top"
   end
 
   experiment :search do
     description "Search experiments"
 
-    bucket :a, control: true, description: "control group"
-    bucket :b, description: "boost CTR"
-    bucket :c, description: "boost GMV"
+    group :a, control: true, description: "control group"
+    group :b, description: "boost CTR"
+    group :c, description: "boost GMV"
   end
 end
 
@@ -57,8 +57,8 @@ end
 
 # In app controllers/views code
 
-experiment(:product_page).in_bucket?(:a) # => true or false
-experiment(:product_page).bucket         # => :a or :b
+experiment(:product_page).in_group?(:a) # => true or false
+experiment(:product_page).group         # => :a or :b
 
 experiment(:product_page).track_view!
 experiment(:product_page).track_conversion!

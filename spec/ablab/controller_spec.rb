@@ -15,8 +15,8 @@ describe ABLab::Controller do
   before do
     ABLab.setup do
       experiment :xxx do
-        bucket :a
-        bucket :b
+        group :a
+        group :b
       end
     end
   end

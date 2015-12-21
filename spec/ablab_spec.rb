@@ -48,24 +48,24 @@ describe ABLab do
       end
     end
 
-    describe '#bucket' do
-      it 'creates a bucket' do
-        experiment.bucket :a, description: 'foo bar baz'
-        expect(experiment.buckets.last).to be_a(ABLab::Bucket)
-        expect(experiment.buckets.last.name).to eq(:a)
-        expect(experiment.buckets.last.description).to eq('foo bar baz')
+    describe '#group' do
+      it 'creates a group' do
+        experiment.group :a, description: 'foo bar baz'
+        expect(experiment.groups.last).to be_a(ABLab::Group)
+        expect(experiment.groups.last.name).to eq(:a)
+        expect(experiment.groups.last.description).to eq('foo bar baz')
       end
     end
 
     describe '.results' do
       it 'returns the results of the experiment' do
-        experiment.bucket :a, control: true
-        experiment.bucket :b
-        allow(ABLab.tracker).to receive(:views) do |_, bucket|
-          { a: 182, b: 188 }[bucket]
+        experiment.group :a, control: true
+        experiment.group :b
+        allow(ABLab.tracker).to receive(:views) do |_, group|
+          { a: 182, b: 188 }[group]
         end
-        allow(ABLab.tracker).to receive(:conversions) do |_, bucket|
-          { a: 35, b: 61 }[bucket]
+        allow(ABLab.tracker).to receive(:conversions) do |_, group|
+          { a: 35, b: 61 }[group]
         end
         results = experiment.results
         expect(results.first).to eq({
@@ -82,8 +82,8 @@ describe ABLab do
       end
 
       it 'raises if there is no control group' do
-        experiment.bucket :a
-        experiment.bucket :b
+        experiment.group :a
+        experiment.group :b
         expect {
           experiment.results
         }.to raise_error ABLab::Result::NoControlGroup
@@ -94,19 +94,19 @@ describe ABLab do
   describe ABLab::Run do
     let(:experiment) do
       ABLab::Experiment.new(:foo) do
-        bucket :a
-        bucket :b
-        bucket :c
+        group :a
+        group :b
+        group :c
       end
     end
 
-    it 'gets assigned to the right bucket' do
+    it 'gets assigned to the right group' do
       a = ABLab::Run.new(experiment, 0)
       b = ABLab::Run.new(experiment, 334)
       c = ABLab::Run.new(experiment, 999)
-      expect(a).to be_in_bucket(:a)
-      expect(b).to be_in_bucket(:b)
-      expect(c).to be_in_bucket(:c)
+      expect(a).to be_in_group(:a)
+      expect(b).to be_in_group(:b)
+      expect(c).to be_in_group(:c)
     end
   end
 end

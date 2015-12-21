@@ -32,11 +32,11 @@ module ABLab
   extend ModuleMethods
 
   class Experiment
-    attr_reader :name, :buckets, :control
+    attr_reader :name, :groups, :control
 
     def initialize(name, &block)
-      @name    = name
-      @buckets = []
+      @name   = name
+      @groups = []
       instance_exec(&block)
     end
 
@@ -45,10 +45,10 @@ module ABLab
       @description
     end
 
-    def bucket(name, options = {})
-      bucket = Bucket.new(name, options[:description])
-      @control = bucket if options[:control]
-      @buckets << bucket
+    def group(name, options = {})
+      group = Group.new(name, options[:description])
+      @control = group if options[:control]
+      @groups << group
     end
 
     def results
@@ -63,32 +63,32 @@ module ABLab
   end
 
   class Run
-    attr_reader :bucket, :experiment
+    attr_reader :group, :experiment
 
     def initialize(experiment, draw)
-      idx         = (draw / (1000.0 / experiment.buckets.size)).floor
+      idx         = (draw / (1000.0 / experiment.groups.size)).floor
       @experiment = experiment
-      @bucket     = experiment.buckets[idx].name
+      @group      = experiment.groups[idx].name
     end
 
-    def in_bucket?(name)
-      bucket == name
+    def in_group?(name)
+      group == name
     end
 
     def track_view!
-      ABLab.tracker.track_view!(experiment.name, bucket)
+      ABLab.tracker.track_view!(experiment.name, group)
     end
 
     def track_conversion!
-      ABLab.tracker.track_conversion!(experiment.name, bucket)
+      ABLab.tracker.track_conversion!(experiment.name, group)
     end
   end
 
-  class Bucket < Struct.new(:name, :description); end
+  class Group < Struct.new(:name, :description); end
 
   class Result
     extend Forwardable
-    def_delegators :@experiment, :name, :control, :buckets
+    def_delegators :@experiment, :name, :control, :groups
 
     def initialize(experiment)
       @experiment = experiment
@@ -97,19 +97,19 @@ module ABLab
     def data
       raise NoControlGroup.new("no control group") if control.nil?
       c_views, c_conv = views_and_conversions(control)
-      buckets.map do |bucket|
-        if bucket == control
+      groups.map do |group|
+        if group == control
           next { views: c_views, conversions: c_conv, control: true }
         end
-        views, conv = views_and_conversions(bucket)
+        views, conv = views_and_conversions(group)
         z = z_score(views, conv, c_views, c_conv)
         { views: views, conversions: conv, z_score: z, control: false }
       end
     end
 
-    private def views_and_conversions(bucket)
-      views       = ABLab.tracker.views(name, bucket.name)
-      conversions = ABLab.tracker.conversions(name, bucket.name)
+    private def views_and_conversions(group)
+      views       = ABLab.tracker.views(name, group.name)
+      conversions = ABLab.tracker.conversions(name, group.name)
       [views, conversions]
     end
 
