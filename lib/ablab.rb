@@ -35,8 +35,9 @@ module ABLab
     attr_reader :name, :groups, :control
 
     def initialize(name, &block)
-      @name   = name
-      @groups = []
+      @name    = name.to_sym
+      @control = Group.new(:control, 'control group')
+      @groups  = [@control]
       instance_exec(&block)
     end
 
@@ -47,7 +48,6 @@ module ABLab
 
     def group(name, options = {})
       group = Group.new(name, options[:description])
-      @control = group if options[:control]
       @groups << group
     end
 
@@ -84,7 +84,12 @@ module ABLab
     end
   end
 
-  class Group < Struct.new(:name, :description); end
+  class Group
+    attr_reader :name, :description
+    def initialize(name, description = nil)
+      @name, @description = name.to_sym, description
+    end
+  end
 
   class Result
     extend Forwardable
@@ -95,7 +100,6 @@ module ABLab
     end
 
     def data
-      raise NoControlGroup.new("no control group") if control.nil?
       c_views, c_conv = views_and_conversions(control)
       groups.map do |group|
         if group == control
@@ -118,7 +122,5 @@ module ABLab
       pc = c_conv.to_f / c_views
       (p - pc) / Math.sqrt((p*(1 - p) / views) + (pc*(1 - pc) / c_views))
     end
-
-    class NoControlGroup < StandardError; end
   end
 end

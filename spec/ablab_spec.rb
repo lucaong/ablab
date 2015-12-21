@@ -38,7 +38,16 @@ describe ABLab do
 
   describe ABLab::Experiment do
     let(:experiment) do
-      ABLab::Experiment.new(:foo) do; end
+      ABLab::Experiment.new('foo') do; end
+    end
+
+    it 'automatically creates a control group' do
+      expect(experiment.control).to be_a(ABLab::Group)
+      expect(experiment.groups).to_not be_empty
+    end
+
+    it 'symbolizes its name' do
+      expect(experiment.name).to eq(:foo)
     end
 
     describe '#description' do
@@ -52,20 +61,23 @@ describe ABLab do
       it 'creates a group' do
         experiment.group :a, description: 'foo bar baz'
         expect(experiment.groups.last).to be_a(ABLab::Group)
-        expect(experiment.groups.last.name).to eq(:a)
         expect(experiment.groups.last.description).to eq('foo bar baz')
+      end
+
+      it 'symbolizes the group name' do
+        experiment.group 'yeah'
+        expect(experiment.groups.last.name).to eq(:yeah)
       end
     end
 
     describe '.results' do
       it 'returns the results of the experiment' do
-        experiment.group :a, control: true
-        experiment.group :b
+        experiment.group :x
         allow(ABLab.tracker).to receive(:views) do |_, group|
-          { a: 182, b: 188 }[group]
+          { control: 182, x: 188 }[group]
         end
         allow(ABLab.tracker).to receive(:conversions) do |_, group|
-          { a: 35, b: 61 }[group]
+          { control: 35, x: 61 }[group]
         end
         results = experiment.results
         expect(results.first).to eq({
@@ -80,14 +92,6 @@ describe ABLab do
           z_score:     2.9410157224928595
         })
       end
-
-      it 'raises if there is no control group' do
-        experiment.group :a
-        experiment.group :b
-        expect {
-          experiment.results
-        }.to raise_error ABLab::Result::NoControlGroup
-      end
     end
   end
 
@@ -96,17 +100,16 @@ describe ABLab do
       ABLab::Experiment.new(:foo) do
         group :a
         group :b
-        group :c
       end
     end
 
     it 'gets assigned to the right group' do
-      a = ABLab::Run.new(experiment, 0)
-      b = ABLab::Run.new(experiment, 334)
-      c = ABLab::Run.new(experiment, 999)
+      c = ABLab::Run.new(experiment, 0)
+      a = ABLab::Run.new(experiment, 334)
+      b = ABLab::Run.new(experiment, 999)
+      expect(c).to be_in_group(:control)
       expect(a).to be_in_group(:a)
       expect(b).to be_in_group(:b)
-      expect(c).to be_in_group(:c)
     end
   end
 end

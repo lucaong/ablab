@@ -32,16 +32,16 @@ ABLab.setup do
   experiment :product_page do
     description "Experiments on the product page"
 
-    group :a, control: true, description: "control group"
-    group :b, description: "show more products from the shop at the top"
+    # A control group, named `:control`, is automatically generated
+    # for each experiment. Create your own groups by calling `group`:
+    group :top_ads, description: "show ads at the top of the page"
   end
 
   experiment :search do
     description "Search experiments"
 
-    group :a, control: true, description: "control group"
-    group :b, description: "boost CTR"
-    group :c, description: "boost GMV"
+    group :ctr, description: "boost by CTR"
+    group :gmv, description: "boost by GMV"
   end
 end
 
@@ -57,8 +57,8 @@ end
 
 # In app controllers/views code
 
-experiment(:product_page).in_group?(:a) # => true or false
-experiment(:product_page).group         # => :a or :b
+experiment(:product_page).in_group?(:top_ads) # => true or false
+experiment(:product_page).group               # => :control or :top_ads
 
 experiment(:product_page).track_view!
 experiment(:product_page).track_conversion!
