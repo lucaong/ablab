@@ -1,3 +1,3 @@
-module ABLab
+module Ablab
   VERSION = "0.1.1"
 end

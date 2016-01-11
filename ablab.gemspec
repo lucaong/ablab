@@ -1,26 +1,26 @@
-# coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'ablab/version'
+$:.push File.expand_path("../lib", __FILE__)
 
-Gem::Specification.new do |spec|
-  spec.name          = "ablab"
-  spec.version       = ABLab::VERSION
-  spec.authors       = ["Luca Ongaro"]
-  spec.email         = ["lukeongaro@gmail.com"]
+# Maintain your gem's version:
+require "ablab/version"
 
-  spec.summary       = "Minimal library for performing AB tests"
-  spec.description   = "Minimal library for performing AB tests, measuring statistical significance."
-  spec.homepage      = "http://github.com/lucaong/ablab"
+# Describe your gem and declare its dependencies:
+Gem::Specification.new do |s|
+  s.name        = "ablab"
+  s.version     = Ablab::VERSION
+  s.authors     = ["Luca Ongaro"]
+  s.email       = ["lukeongaro@gmail.com"]
+  # s.homepage    = "TODO"
+  s.summary     = "Ablab - A/B testing on Rails"
+  s.description = "Ablab - A/B testing on Rails"
+  s.license     = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  spec.bindir        = "exe"
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
-  spec.require_paths = ["lib"]
+  s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
+  s.test_files = Dir["spec/**/*"]
 
-  spec.add_dependency "redis"
+  s.add_dependency "rails", "~> 4.2.5"
+  s.add_dependency "redis"
 
-  spec.add_development_dependency "bundler", "~> 1.10"
-  spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec"
+  s.add_development_dependency "rake"
+  s.add_development_dependency "bundler"
+  s.add_development_dependency "rspec"
 end

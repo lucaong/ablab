@@ -51,7 +51,7 @@ end
 require 'ablab'
 
 class ApplicationController < ActionController::Base
-  include ABLab::Controller
+  include ABLab::Helper
 end
 
 

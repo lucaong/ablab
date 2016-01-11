@@ -1,6 +1,6 @@
 require 'redis'
 
-module ABLab
+module Ablab
   module Store
     class Redis
       attr_reader :redis

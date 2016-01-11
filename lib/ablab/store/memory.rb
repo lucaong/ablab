@@ -1,6 +1,6 @@
 require 'set'
 
-module ABLab
+module Ablab
   module Store
     class Memory
       def initialize

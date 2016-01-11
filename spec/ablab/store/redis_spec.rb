@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'ablab/store/store_examples'
 
-describe ABLab::Store::Redis do
+describe Ablab::Store::Redis do
   def cleanup
     redis = ::Redis.new(db: 2)
     keys  = redis.keys('ablabtest:*')
@@ -19,7 +19,7 @@ describe ABLab::Store::Redis do
     end
   end
 
-  let(:store) { ABLab::Store::Redis.new(db: 2, key_prefix: 'ablabtest') }
+  let(:store) { Ablab::Store::Redis.new(db: 2, key_prefix: 'ablabtest') }
   include_examples 'store'
 end
 

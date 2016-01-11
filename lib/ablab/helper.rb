@@ -1,4 +1,6 @@
-module ABLab
+require 'securerandom'
+
+module Ablab
   module Helper
     def self.included(klass)
       if klass.respond_to? :helper_method
@@ -11,15 +13,15 @@ module ABLab
 
     def experiment(name)
       @experiments ||= {}
-      unless ABLab.experiments.has_key?(name)
+      unless Ablab.experiments.has_key?(name)
         raise "No experiment with name #{name}"
       end
       @experiments[name] ||=
-        ABLab.experiments[name].run(session_id_for_experiments)
+        Ablab.experiments[name].run(ablab_session_id)
     end
 
-    def session_id_for_experiments
-      env['rack.session'].id
+    def ablab_session_id
+      cookies[:ablab_sid] || cookies[:ablab_sid] = SecureRandom.hex
     end
   end
 end

@@ -1,8 +1,10 @@
 require "ablab/version"
 require "ablab/helper"
 require "ablab/store"
+require "ablab/engine"
+require "forwardable"
 
-module ABLab
+module Ablab
   module ModuleMethods
     attr_reader :experiments
 
@@ -20,12 +22,12 @@ module ABLab
         @tracker = Class.new(*args)
       else
         class_name = type.to_s.split('_').map(&:capitalize).join
-        @tracker = ABLab::Store.const_get(class_name).new(*args)
+        @tracker = Ablab::Store.const_get(class_name).new(*args)
       end
     end
 
     def tracker
-      @tracker ||= ABLab::Store::Memory.new
+      @tracker ||= Ablab::Store::Memory.new
     end
   end
 
@@ -74,11 +76,11 @@ module ABLab
     end
 
     def track_view!
-      ABLab.tracker.track_view!(experiment.name, group, session_id)
+      Ablab.tracker.track_view!(experiment.name, group, session_id)
     end
 
     def track_success!
-      ABLab.tracker.track_success!(experiment.name, group, session_id)
+      Ablab.tracker.track_success!(experiment.name, group, session_id)
     end
 
     def group
@@ -88,7 +90,7 @@ module ABLab
     end
 
     def draw
-      Random.new(session_id.hash * experiment.name.hash).rand(1000)
+      Random.new(session_id.hash ^ experiment.name.hash).rand(1000)
     end
   end
 
@@ -111,22 +113,22 @@ module ABLab
       counts_c = counts(control)
       groups.map do |group|
         if group == control
-          next counts_c.merge(control: true)
+          next [group.name, counts_c.merge(control: true)]
         end
         counts = counts(group)
         z = z_score(counts[:sessions], counts[:conversions],
                     counts_c[:sessions], counts_c[:conversions])
-        counts.merge(z_score: z, control: false)
-      end
+        [group.name, counts.merge(z_score: z, control: false)]
+      end.to_h
     end
 
     private def counts(group)
-      ABLab.tracker.counts(name, group.name)
+      Ablab.tracker.counts(name, group.name)
     end
 
     private def z_score(s, c, sc, cc)
-      p  = [c.to_f / s, 1.0].min
-      pc = [cc.to_f / sc, 1.0].min
+      p  = s == 0 ? 0.0 : [c.to_f / s, 1.0].min
+      pc = sc == 0 ? 0.0 : [cc.to_f / sc, 1.0].min
       (p - pc) / Math.sqrt((p*(1 - p) / s) + (pc*(1 - pc) / sc))
     end
   end
