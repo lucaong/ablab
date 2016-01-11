@@ -1,4 +1,4 @@
-# ABLab
+# Ablab
 
 A minimal library for performing AB-tests in Rails applications and checking
 their statistical significance.
@@ -26,7 +26,7 @@ Or install it yourself as:
 ```ruby
 # In `initializers/ablab.rb`
 
-ABLab.setup do
+Ablab.setup do
   store :redis, host: 'localhost', port: 6379
 
   experiment :product_page do
@@ -51,7 +51,7 @@ end
 require 'ablab'
 
 class ApplicationController < ActionController::Base
-  include ABLab::Helper
+  include Ablab::Helper
 end
 
 
@@ -64,10 +64,9 @@ experiment(:product_page).track_view!
 experiment(:product_page).track_conversion!
 
 
-# Results of the experiment
-ABTest.experiments.each do |experiment|
-  puts "#{experiment.name}: #{experiment.results.inspect}"
-end
+# In routes.rb
+
+mount Ablab::Engine => '/ablab'
 ```
 
 
