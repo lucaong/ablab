@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ablab (0.1.1)
+    ablab (0.2.0)
       rails (~> 4.2.5)
       redis
 
@@ -125,4 +125,4 @@ DEPENDENCIES
   rspec
 
 BUNDLED WITH
-   1.10.6
+   1.11.2
