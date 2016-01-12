@@ -1,2 +1,31 @@
-<h1>Ablab#dashboard</h1>
-<p><%= @experiments.map { |name, e| [name, e.results] }.to_h.inspect %></p>
+<h1>A/B Tests Dashboard</h1>
+
+<% @experiments.each do |name, experiment| %>
+  <div class="experiment">
+    <h2><%= experiment.name %></h2>
+    <table class="experiment">
+      <tr>
+        <th>group</th>
+        <th>views</th>
+        <th>sessions</th>
+        <th>successes</th>
+        <th>conversions</th>
+        <th>conversion rate</th>
+        <th>z-score</th>
+        <th>confidence</th>
+      </tr>
+      <% experiment.results.each do |group_name, results| %>
+        <tr>
+          <td><%= group_name %></td>
+          <td><%= results[:views] %></td>
+          <td><%= results[:sessions] %></td>
+          <td><%= results[:successes] %></td>
+          <td><%= results[:conversions] %></td>
+          <td><%= results[:conversions] / results[:views] %></td>
+          <td><%= results[:z_score] || 'n/a' %></td>
+          <td><%= 'TODO' %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+<% end %>
