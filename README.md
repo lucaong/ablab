@@ -108,6 +108,11 @@ Ablab.trackSuccess('add_to_cart_button') // to track goal
 Then go to `yourapp.com/ablab` to see the experiment dashboard.
 
 
+## Screenshot
+
+![Ablab Dashboard](https://raw.githubusercontent.com/lucaong/ablab/master/dashboard.png)
+
+
 ## Feature Wishlist
 
   - Include only a certain percentage of users in an experiment
