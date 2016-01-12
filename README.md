@@ -66,10 +66,10 @@ Ablab.setup do
 
   # You can setup as many experiments as you wish
   experiment :search do
-    description "Search experiments"
+    description 'Search experiments'
 
-    group :ctr, description: "boost by CTR"
-    group :gmv, description: "boost by GMV"
+    group :ctr, description: 'boost by CTR'
+    group :gmv, description: 'boost by GMV'
   end
 end
 ```
