@@ -35,7 +35,7 @@ Add the `Ablab` JavaScript in your bundle:
 ```javascript
 // app/assets/javascripts/application.js
 
-//= include ablab/tracker
+//= require ablab/tracker
 ```
 
 Create an initializer file to setup your experiments:
