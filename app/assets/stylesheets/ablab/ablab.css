@@ -2,3 +2,98 @@
   Place all the styles related to the matching controller here.
   They will automatically be included in application.css.
 */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  background: #f5f5f5;
+  color: #555555;
+  font-size: 15px;
+  padding: 0;
+  margin: 0;
+}
+
+body > * {
+  padding: 1em 1.618em;
+}
+
+h1, h2, h3 {
+  margin: 0 0 0.618em 0;
+}
+
+header {
+  background: #777777;
+  border-bottom: 2px solid #555555;
+}
+
+header h1 {
+  color: #c4c4c4;
+  text-shadow: 0 -1px 0 #555555;
+  margin: 0;
+  font-size: 24px;
+}
+
+p {
+  margin: 0 0 0.618em 0;
+}
+
+.experiment {
+  padding-top: 1.618em;
+  padding-bottom: 2.5em;
+  border-bottom: 1px solid #ececec;
+  box-shadow: 0 1px 0 #fcfcfc;
+}
+
+.experiment:last-child {
+  border: none;
+  box-shadow: none;
+}
+
+table {
+  border-collapse: collapse;
+  background: #fff4ed;
+}
+
+table tr:nth-child(odd) {
+  background: #ffe9dc;
+}
+
+table tr.control {
+  background: #dddddd;
+}
+
+table tr.control td {
+  border: 1px solid #aaaaaa;
+  color: #555555;
+}
+
+table tr.winner {
+  font-weight: bold;
+  background: #C9F9B5;
+}
+
+table tr.winner td {
+  border: 1px solid #70DC42;
+  color: #2a6212;
+}
+
+table td, table th {
+  color: #652600;
+  padding: 0.618em 1em;
+  border: 1px solid #ffa26b;
+}
+
+table th {
+  background: #ffa26b;
+  border: none;
+  border-bottom: 2px solid #e96e25;
+  border-left: 1px dotted #e96e25;
+}
+
+table {
+  border: 1px solid #ffa26b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}

@@ -1,29 +1,37 @@
-<h1>A/B Tests Dashboard</h1>
+<header>
+  <h1>A/B Tests Dashboard</h1>
+</header>
 
 <% @experiments.each do |name, experiment| %>
   <div class="experiment">
-    <h2><%= experiment.name %></h2>
-    <table class="experiment">
+    <h2><%= experiment.name.to_s.titleize %></h2>
+    <p><%= experiment.description %></p>
+    <% if experiment.goal %>
+      <p><b>Goal:</b> <%= experiment.goal %></p>
+    <% end %>
+    <table>
       <tr>
-        <th>group</th>
-        <th>views</th>
-        <th>sessions</th>
-        <th>successes</th>
-        <th>conversions</th>
-        <th>conversion rate</th>
-        <th>z-score</th>
-        <th>confidence</th>
+        <th>Group</th>
+        <th>Description</th>
+        <th>Views</th>
+        <th>Sessions</th>
+        <th>Successes</th>
+        <th>Conversions</th>
+        <th>Conversion rate</th>
+        <th>Z-score</th>
+        <th>Confidence</th>
       </tr>
       <% experiment.results.each do |group_name, results| %>
-        <tr>
-          <td><%= group_name %></td>
-          <td><%= results[:views] %></td>
-          <td><%= results[:sessions] %></td>
-          <td><%= results[:successes] %></td>
-          <td><%= results[:conversions] %></td>
-          <td><%= results[:conversions] / results[:views] %></td>
-          <td><%= results[:z_score] || 'n/a' %></td>
-          <td><%= 'TODO' %></td>
+        <tr class="<%= 'winner' if winner?(experiment, group_name) %> <%= 'control' if results[:control] %>">
+          <td title="<%= results[:description] %>"><b><%= group_name.to_s.titleize %></b></td>
+          <td><%= results[:description] %></td>
+          <td><%= format_number results[:views] %></td>
+          <td><%= format_number results[:sessions] %></td>
+          <td><%= format_number results[:successes] %></td>
+          <td><%= format_number results[:conversions] %></td>
+          <td><%= format_ratio results[:conversions].to_f, results[:sessions] %></td>
+          <td><%= format_decimal results[:z_score] %></td>
+          <td><%= confidence results[:z_score] %></td>
         </tr>
       <% end %>
     </table>

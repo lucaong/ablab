@@ -2,6 +2,10 @@ require_dependency "ablab/application_controller"
 
 module Ablab
   class BaseController < ApplicationController
+    if Ablab.dashboard_credentials
+      http_basic_authenticate_with Ablab.dashboard_credentials.merge(only: :dashboard)
+    end
+
     def track
       exp = experiment(params[:experiment].to_sym)
       if params[:event] == 'success'

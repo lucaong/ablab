@@ -29,7 +29,19 @@ module Ablab
     def tracker
       @tracker ||= Ablab::Store::Memory.new
     end
+
+    def dashboard_credentials(credentials = nil)
+      if credentials
+        unless credentials[:name] && credentials[:password]
+          raise InvalidCredentials, 'credentials should provide name and password'
+        end
+        @dashboard_credentials = credentials
+      end
+      @dashboard_credentials
+    end
   end
+
+  class InvalidCredentials < ArgumentError; end
 
   extend ModuleMethods
 
@@ -46,6 +58,11 @@ module Ablab
     def description(desc = nil)
       @description = desc if desc
       @description
+    end
+
+    def goal(goal = nil)
+      @goal = goal if goal
+      @goal
     end
 
     def group(name, options = {})
@@ -113,12 +130,12 @@ module Ablab
       counts_c = counts(control)
       groups.map do |group|
         if group == control
-          next [group.name, counts_c.merge(control: true)]
+          next [group.name, counts_c.merge(control: true, description: group.description)]
         end
         counts = counts(group)
         z = z_score(counts[:sessions], counts[:conversions],
                     counts_c[:sessions], counts_c[:conversions])
-        [group.name, counts.merge(z_score: z, control: false)]
+        [group.name, counts.merge(z_score: z, control: false, description: group.description)]
       end.to_h
     end
 
@@ -127,8 +144,9 @@ module Ablab
     end
 
     private def z_score(s, c, sc, cc)
-      p  = s == 0 ? 0.0 : [c.to_f / s, 1.0].min
-      pc = sc == 0 ? 0.0 : [cc.to_f / sc, 1.0].min
+      return nil if s == 0 || sc == 0
+      p  = c.to_f / s
+      pc = cc.to_f / sc
       (p - pc) / Math.sqrt((p*(1 - p) / s) + (pc*(1 - pc) / sc))
     end
   end

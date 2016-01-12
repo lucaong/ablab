@@ -36,6 +36,23 @@ describe Ablab do
     end
   end
 
+  describe '.dashboard_credentials' do
+    it 'raises if called without name or password' do
+      expect {
+        ab.dashboard_credentials(name: 'foo')
+      }.to raise_error(Ablab::InvalidCredentials)
+
+      expect {
+        ab.dashboard_credentials(password: 'foo')
+      }.to raise_error(Ablab::InvalidCredentials)
+    end
+
+    it 'sets and gets the credentials' do
+      ab.dashboard_credentials(name: 'foo', password: 'bar')
+      expect(ab.dashboard_credentials).to eq(name: 'foo', password: 'bar')
+    end
+  end
+
   describe Ablab::Experiment do
     let(:experiment) do
       Ablab::Experiment.new('foo') do; end
@@ -57,6 +74,13 @@ describe Ablab do
       end
     end
 
+    describe '#description' do
+      it 'sets the experiment goal' do
+        experiment.goal 'foo bar'
+        expect(experiment.goal).to eq('foo bar')
+      end
+    end
+
     describe '#group' do
       it 'creates a group' do
         experiment.group :a, description: 'foo bar baz'
@@ -72,7 +96,7 @@ describe Ablab do
 
     describe '.results' do
       it 'returns the results of the experiment' do
-        experiment.group :x
+        experiment.group :x, description: 'a test group'
         allow(Ablab.tracker).to receive(:views) do |_, group|
           { control: 201, x: 238 }[group]
         end
@@ -91,7 +115,8 @@ describe Ablab do
           sessions:    182,
           successes:   38,
           conversions: 35,
-          control:     true
+          control:     true,
+          description: 'control group'
         })
         expect(results[:x]).to eq({
           views:       238,
@@ -99,7 +124,8 @@ describe Ablab do
           successes:   70,
           conversions: 61,
           control:     false,
-          z_score:     2.9410157224928595
+          z_score:     2.9410157224928595,
+          description: 'a test group'
         })
       end
     end
