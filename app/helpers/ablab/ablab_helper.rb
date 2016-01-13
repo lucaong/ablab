@@ -15,8 +15,9 @@ module Ablab
       '%.3f' % decimal
     end
 
-    def significant?(z_score)
-      z_score && z_score >= 1.65
+    def significant?(results)
+      return false if results[:sessions] < 30 || results[:conversions] < 5
+      results[:z_score] && results[:z_score] >= 1.65
     end
 
     def confidence(z_score, na = 'n/a')
@@ -40,7 +41,7 @@ module Ablab
           -1
         end
       end
-      significant?(winner_results[:z_score]) && winner_name == group_name
+      significant?(winner_results) && winner_name == group_name
     end
   end
 end
