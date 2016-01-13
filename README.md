@@ -68,6 +68,10 @@ Ablab.setup do
   experiment :search do
     description 'Search experiments'
 
+    # You can restrict the experiment only to a certain percentage of users (the
+    # groups will still be equally sized within the given percentage)
+    percentage_of_visitors 20
+
     group :ctr, description: 'boost by CTR'
     group :gmv, description: 'boost by GMV'
   end
@@ -115,7 +119,6 @@ Then go to `yourapp.com/ablab` to see the experiment dashboard.
 
 ## Feature Wishlist
 
-  - Include only a certain percentage of users in an experiment
   - Pause/resume experiments
   - See how long an experiment has been running
   - Set in which group you get assigned for testing purposes

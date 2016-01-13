@@ -11,6 +11,7 @@ module Ablab
       end
 
       def track_view!(experiment, bucket, session_id)
+        return false if bucket.nil?
         redis.pipelined do
           redis.incr(key(:views, experiment, bucket))
           redis.pfadd(key(:sessions, experiment, bucket), session_id)
@@ -18,6 +19,7 @@ module Ablab
       end
 
       def track_success!(experiment, bucket, session_id)
+        return false if bucket.nil?
         redis.pipelined do
           redis.incr(key(:successes, experiment, bucket))
           redis.pfadd(key(:conversions, experiment, bucket), session_id)

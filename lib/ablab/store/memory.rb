@@ -19,11 +19,13 @@ module Ablab
       end
 
       def track_view!(experiment, bucket, session_id)
+        return false if bucket.nil?
         @views[experiment][bucket] += 1
         @sessions[experiment][bucket].add(session_id)
       end
 
       def track_success!(experiment, bucket, session_id)
+        return false if bucket.nil?
         @successes[experiment][bucket] += 1
         @conversions[experiment][bucket].add(session_id)
       end

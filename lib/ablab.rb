@@ -65,6 +65,11 @@ module Ablab
       @goal
     end
 
+    def percentage_of_visitors(percentage = nil)
+      @percentage_of_visitors = percentage if percentage
+      @percentage_of_visitors || 100
+    end
+
     def group(name, options = {})
       group = Group.new(name, options[:description])
       @groups << group
@@ -102,8 +107,9 @@ module Ablab
 
     def group
       return @group unless @group.nil?
-      idx = (draw / (1000.0 / experiment.groups.size)).floor
-      @group = experiment.groups[idx].name
+      size = 1000.0 * (experiment.percentage_of_visitors) / 100.0
+      idx = (draw * experiment.groups.size / size).floor
+      @group = experiment.groups[idx].try(:name)
     end
 
     def draw

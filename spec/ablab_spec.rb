@@ -74,10 +74,21 @@ describe Ablab do
       end
     end
 
-    describe '#description' do
+    describe '#goal' do
       it 'sets the experiment goal' do
         experiment.goal 'foo bar'
         expect(experiment.goal).to eq('foo bar')
+      end
+    end
+
+    describe '#percentage_of_visitors' do
+      it 'returns 100 if never set' do
+        expect(experiment.percentage_of_visitors).to eq(100)
+      end
+
+      it 'sets the percentage of visitors included in the experiment' do
+        experiment.percentage_of_visitors 25
+        expect(experiment.percentage_of_visitors).to eq(25)
       end
     end
 
@@ -155,6 +166,22 @@ describe Ablab do
       run1 = Ablab::Run.new(experiment, 'foobar')
       run2 = Ablab::Run.new(experiment, 'foobar')
       expect(run1.group).to eq(run2.group)
+    end
+
+    it 'selects only the given percentage of users' do
+      experiment.percentage_of_visitors 30
+      run = Ablab::Run.new(experiment, 0)
+      allow(run).to receive(:draw).and_return 0
+      expect(run).to be_in_group(:control)
+      run = Ablab::Run.new(experiment, 0)
+      allow(run).to receive(:draw).and_return 100
+      expect(run).to be_in_group(:a)
+      run = Ablab::Run.new(experiment, 0)
+      allow(run).to receive(:draw).and_return 200
+      expect(run).to be_in_group(:b)
+      run = Ablab::Run.new(experiment, 0)
+      allow(run).to receive(:draw).and_return 300
+      expect(run.group).to be_nil
     end
   end
 end

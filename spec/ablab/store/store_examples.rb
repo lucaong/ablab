@@ -2,6 +2,10 @@ require 'spec_helper'
 
 RSpec.shared_examples 'store' do
   describe '#track_view!' do
+    it 'returns false if group is nil' do
+      expect(store.track_view!(:foo, nil, 'abc')).to be(false)
+    end
+
     it 'tracks views' do
       5.times { store.track_view!(:foo, :a, 'abc') }
       7.times { store.track_view!(:foo, :b, 'abc') }
@@ -23,6 +27,10 @@ RSpec.shared_examples 'store' do
   end
 
   describe '#track_success!' do
+    it 'returns false if group is nil' do
+      expect(store.track_success!(:foo, nil, 'abc')).to be(false)
+    end
+
     it 'tracks successes' do
       5.times { store.track_success!(:foo, :a, 'abc') }
       7.times { store.track_success!(:foo, :b, 'abc') }
