@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/lucaong/ablab.svg?branch=master)](https://travis-ci.org/lucaong/ablab)
+[![Code Climate](https://codeclimate.com/github/lucaong/ablab/badges/gpa.svg)](https://codeclimate.com/github/lucaong/ablab)
 
 # Ablab
 
