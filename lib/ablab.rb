@@ -90,7 +90,6 @@ module Ablab
 
     def initialize(experiment, session_id)
       @experiment, @session_id = experiment, session_id
-      @experiment = experiment
     end
 
     def in_group?(name)
