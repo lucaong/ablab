@@ -5,16 +5,16 @@ module Ablab
     class Memory
       def initialize
         @views = Hash.new do |hash, key|
-          hash[key] = Hash.new { |hash, key| hash[key] = 0 }
+          hash[key] = Hash.new { |h, k| h[k] = 0 }
         end
         @sessions = Hash.new do |hash, key|
-          hash[key] = Hash.new { |hash, key| hash[key] = Set.new }
+          hash[key] = Hash.new { |h, k| h[k] = Set.new }
         end
         @successes = Hash.new do |hash, key|
-          hash[key] = Hash.new { |hash, key| hash[key] = 0 }
+          hash[key] = Hash.new { |h, k| h[k] = 0 }
         end
         @conversions = Hash.new do |hash, key|
-          hash[key] = Hash.new { |hash, key| hash[key] = Set.new }
+          hash[key] = Hash.new { |h, k| h[k] = Set.new }
         end
       end
 
