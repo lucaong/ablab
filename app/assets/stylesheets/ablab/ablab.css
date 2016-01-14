@@ -3,8 +3,12 @@
   They will automatically be included in application.css.
 */
 
-* {
+html {
   box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
 }
 
 body {

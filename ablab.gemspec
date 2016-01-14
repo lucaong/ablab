@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.version     = Ablab::VERSION
   s.authors     = ["Luca Ongaro"]
   s.email       = ["lukeongaro@gmail.com"]
-  # s.homepage    = "TODO"
+  s.homepage    = "https://github.com/lucaong/ablab"
   s.summary     = "Ablab - A/B testing on Rails"
   s.description = "Ablab - A/B testing on Rails"
   s.license     = "MIT"

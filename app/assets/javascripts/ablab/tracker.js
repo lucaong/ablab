@@ -16,4 +16,4 @@ var Ablab = (function(scripts) {
       currentScript.parentNode.appendChild(script);
     }
   }
-})(document.getElementsByTagName("script"));
+}(document.getElementsByTagName("script")));
