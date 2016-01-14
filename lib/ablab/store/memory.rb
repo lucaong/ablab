@@ -19,15 +19,11 @@ module Ablab
       end
 
       def track_view!(experiment, bucket, session_id)
-        return false if bucket.nil?
-        @views[experiment][bucket] += 1
-        @sessions[experiment][bucket].add(session_id)
+        track(experiment, bucket, session_id, @views, @sessions)
       end
 
       def track_success!(experiment, bucket, session_id)
-        return false if bucket.nil?
-        @successes[experiment][bucket] += 1
-        @conversions[experiment][bucket].add(session_id)
+        track(experiment, bucket, session_id, @successes, @conversions)
       end
 
       def views(experiment, bucket)
@@ -53,6 +49,12 @@ module Ablab
           successes:   successes(experiment, bucket),
           conversions: conversions(experiment, bucket)
         }
+      end
+
+      private def track(experiment, bucket, session_id, counter, set)
+        return false if bucket.nil?
+        counter[experiment][bucket] += 1
+        set[experiment][bucket].add(session_id)
       end
     end
   end

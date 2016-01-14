@@ -54,11 +54,11 @@ module Ablab
         "#{@key_prefix}:#{type}:#{experiment}:#{bucket}"
       end
 
-      private def track(experiment, bucket, session_id, counter, unique)
+      private def track(experiment, bucket, session_id, counter, set)
         return false if bucket.nil?
         redis.pipelined do
           redis.incr(key(counter, experiment, bucket))
-          redis.pfadd(key(unique, experiment, bucket), session_id)
+          redis.pfadd(key(set, experiment, bucket), session_id)
         end
       end
     end
