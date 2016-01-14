@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lucaong/ablab.svg?branch=master)](https://travis-ci.org/lucaong/ablab)
+
 # Ablab
 
 A minimal library for performing AB-tests in Rails applications and tracking
