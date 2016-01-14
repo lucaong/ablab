@@ -8,10 +8,12 @@ module Ablab
 
     def track
       exp = experiment(params[:experiment].to_sym)
-      if params[:event] == 'success'
-        exp.track_success!
-      else
-        exp.track_view!
+      Thread.new do
+        if params[:event] == 'success'
+          exp.track_success!
+        else
+          exp.track_view!
+        end
       end
       respond_to do |format|
         format.js
