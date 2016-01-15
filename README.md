@@ -125,6 +125,7 @@ Then go to `yourapp.com/ablab` to see the experiment dashboard.
   - Pause/resume experiments
   - See how long an experiment has been running
   - Set in which group you get assigned for testing purposes
+  - Hooks to send tracking events to external services (e.g. Google Analytics)
 
 
 ## Contributing

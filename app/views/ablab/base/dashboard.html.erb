@@ -11,15 +11,34 @@
     <% end %>
     <table>
       <tr>
-        <th>Group</th>
-        <th>Description</th>
-        <th>Views</th>
-        <th>Sessions</th>
-        <th>Successes</th>
-        <th>Conversions</th>
-        <th>Conversion rate</th>
-        <th>Z-score</th>
-        <th>Confidence</th>
+        <th>Group
+          <i>The group, defining a variant of the experiment</i>
+        </th>
+        <th>Description
+          <i>The description of the variant of the experiment corresponding to a group</i>
+        </th>
+        <th>Views
+          <i>How many times the experiment was viewed in a group</i>
+        </th>
+        <th>Sessions
+          <i>How many unique visitors in a group viewed the experiment</i>
+        </th>
+        <th>Successes
+          <i>How many times the goal was reached for a group</i>
+        </th>
+        <th>Conversions
+          <i>How many unique visitors in a group reached the goal</i>
+        </th>
+        <th>Conversion rate
+          <i>Ratio of convertions over sessions</i>
+        </th>
+        <th>Z-score
+          <i>Z-score for the confidence testing</i>
+        </th>
+        <th>Confidence
+          <i>Probability that this group is having a real effect on the
+            conversion rate, compared to the control group</i>
+        </th>
       </tr>
       <% experiment.results.each do |group_name, results| %>
         <tr class="<%= 'winner' if winner?(experiment, group_name) %> <%= 'control' if results[:control] %>">
