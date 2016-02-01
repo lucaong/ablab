@@ -183,5 +183,14 @@ describe Ablab do
       allow(run).to receive(:draw).and_return 300
       expect(run.group).to be_nil
     end
+
+    describe "#draw" do
+      it "is stable across ruby processes" do
+        d1 = Ablab::Run.new(experiment, '8asd7f8asf7').draw
+        dir = File.expand_path(File.dirname(__FILE__), '../lib')
+        d2 = `bundle exec ruby -I#{dir} -e "require 'ablab'; require 'ostruct'; puts Ablab::Run.new(OpenStruct.new(name: :foo), '8asd7f8asf7').draw"`
+        expect(d1).to eq(d2.to_i)
+      end
+    end
   end
 end

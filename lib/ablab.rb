@@ -112,7 +112,9 @@ module Ablab
     end
 
     def draw
-      Random.new(session_id.hash ^ experiment.name.hash).rand(1000)
+      sid_hash = Digest::SHA1.hexdigest(session_id)[-8..-1].to_i(16)
+      exp_hash = Digest::SHA1.hexdigest(experiment.name.to_s)[-8..-1].to_i(16)
+      sid_hash ^ exp_hash % 1000
     end
   end
 
