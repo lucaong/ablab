@@ -191,6 +191,18 @@ describe Ablab do
         d2 = `bundle exec ruby -I#{dir} -e "require 'ablab'; require 'ostruct'; puts Ablab::Run.new(OpenStruct.new(name: :foo), '8asd7f8asf7').draw"`
         expect(d1).to eq(d2.to_i)
       end
+
+      it "returns an integer number < 1000" do
+        expect(
+          (0..100).map { |i| Ablab::Run.new(experiment, "#{i}").draw }.all? { |x| x.is_a?(Integer) && x < 1000 }
+        ).to be(true)
+      end
+    end
+
+    describe "#group" do
+      it "returns one of the groups" do
+        expect(Ablab::Run.new(experiment, rand(12345).to_s).group).to be_in([:a, :b, :control])
+      end
     end
   end
 end
