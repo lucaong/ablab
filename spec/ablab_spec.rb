@@ -150,6 +150,10 @@ describe Ablab do
       end
     end
 
+    let(:run) do
+      Ablab::Run.new(experiment, '86wfd8w6df')
+    end
+
     it 'gets assigned to the right group' do
       run = Ablab::Run.new(experiment, 0)
       allow(run).to receive(:draw).and_return 0
@@ -202,6 +206,40 @@ describe Ablab do
     describe "#group" do
       it "returns one of the groups" do
         expect(Ablab::Run.new(experiment, rand(12345).to_s).group).to be_in([:a, :b, :control])
+      end
+    end
+
+    describe "#track_view!" do
+      it "tracks the view" do
+        expect(Ablab.tracker).to receive(:track_view!)
+          .with(run.experiment.name, run.group, run.session_id)
+        run.track_view!
+      end
+
+      it "performs callbacks" do
+        x = nil
+        experiment.on_track do |event, experiment, group, session|
+          x = [event, experiment, group, session]
+        end
+        run.track_view!
+        expect(x).to eq([:view, :foo, run.group, run.session_id])
+      end
+    end
+
+    describe "#track_success!" do
+      it "tracks the success" do
+        expect(Ablab.tracker).to receive(:track_success!)
+          .with(run.experiment.name, run.group, run.session_id)
+        run.track_success!
+      end
+
+      it "performs callbacks" do
+        x = nil
+        experiment.on_track do |event, experiment, group, session|
+          x = [event, experiment, group, session]
+        end
+        run.track_success!
+        expect(x).to eq([:success, :foo, run.group, run.session_id])
       end
     end
   end

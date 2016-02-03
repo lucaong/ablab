@@ -65,6 +65,11 @@ Ablab.setup do
     # for each experiment. Create your own groups by calling `group`:
     group :version_a, description: 'big green button'
     group :version_b, description: 'smaller button at the top of the page'
+
+    # It is possible to setup callbacks for other services:
+    on_track do |event, experiment_name, group_name, ablab_session_id|
+      # ...send data to external service. `event` can be :view or :success
+    end
   end
 
   # You can setup as many experiments as you wish

@@ -46,12 +46,13 @@ module Ablab
   extend ModuleMethods
 
   class Experiment
-    attr_reader :name, :groups, :control
+    attr_reader :name, :groups, :control, :callbacks
 
     def initialize(name, &block)
-      @name    = name.to_sym
-      @control = Group.new(:control, 'control group')
-      @groups  = [@control]
+      @name      = name.to_sym
+      @control   = Group.new(:control, 'control group')
+      @groups    = [@control]
+      @callbacks = []
       instance_exec(&block)
     end
 
@@ -73,6 +74,10 @@ module Ablab
     def group(name, options = {})
       group = Group.new(name, options[:description])
       @groups << group
+    end
+
+    def on_track(&block)
+      @callbacks << block
     end
 
     def results
@@ -98,10 +103,12 @@ module Ablab
 
     def track_view!
       Ablab.tracker.track_view!(experiment.name, group, session_id)
+      perform_callbacks!(:view)
     end
 
     def track_success!
       Ablab.tracker.track_success!(experiment.name, group, session_id)
+      perform_callbacks!(:success)
     end
 
     def group
@@ -115,6 +122,12 @@ module Ablab
       sid_hash = Digest::SHA1.hexdigest(session_id)[-8..-1].to_i(16)
       exp_hash = Digest::SHA1.hexdigest(experiment.name.to_s)[-8..-1].to_i(16)
       (sid_hash ^ exp_hash) % 1000
+    end
+
+    def perform_callbacks!(event)
+      experiment.callbacks.each do |cbk|
+        cbk.call(event, experiment.name, group, session_id)
+      end
     end
   end
 
