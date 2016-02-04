@@ -217,6 +217,13 @@ describe Ablab do
       it "returns one of the groups" do
         expect(Ablab::Run.new(experiment, rand(12345).to_s, request).group).to be_in([:a, :b, :control])
       end
+
+      it "returns the forced group, if set with the 'ablab_group' param" do
+        params = { ablab_group: 'bar:baz,foo:a' }
+        allow(request).to receive(:params).and_return(params)
+        run = Ablab::Run.new(experiment, '6q5wed', request)
+        expect(run.group).to eq(:a)
+      end
     end
 
     describe "#track_view!" do

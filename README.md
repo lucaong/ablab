@@ -129,6 +129,13 @@ Ablab.trackSuccess('add_to_cart_button') // to track goal
 
 Then go to `yourapp.com/ablab` to see the experiment dashboard.
 
+For testing purposes, you can force yourself in a specific group for an
+experiment by adding a special `ablab_group` parameter to your request:
+
+```
+http://my_application.com/some_path?ablab_group=experiment_name:group_name
+```
+
 
 ## Screenshot
 
@@ -139,8 +146,6 @@ Then go to `yourapp.com/ablab` to see the experiment dashboard.
 
   - Pause/resume experiments
   - See how long an experiment has been running
-  - Set in which group you get assigned for testing purposes
-  - Hooks to send tracking events to external services (e.g. Google Analytics)
 
 
 ## Contributing
