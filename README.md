@@ -66,9 +66,14 @@ Ablab.setup do
     group :version_a, description: 'big green button'
     group :version_b, description: 'smaller button at the top of the page'
 
-    # It is possible to setup callbacks for other services:
-    on_track do |event, experiment_name, group_name, ablab_session_id|
-      # ...send data to external service. `event` can be :view or :success
+    # It is possible to setup callbacks for when a view or success is tracked,
+    # for example to send data to other services:
+    on_track do |event, experiment_name, group_name, ablab_id, request|
+      # ...send data to external service.
+      # `event` can be :view or :success
+      # `ablab_id` is a alphanumeric string identifying the user session
+      # `request` is the Rails request object, useful if you need access to
+      # cookies, etc.
     end
   end
 
@@ -82,6 +87,11 @@ Ablab.setup do
 
     group :ctr, description: 'boost by CTR'
     group :gmv, description: 'boost by GMV'
+  end
+
+  # Callbacks can also be added for all experiments:
+  on_track do |event, experiment_name, group_name, ablab_id, request|
+    # ...do something
   end
 end
 ```

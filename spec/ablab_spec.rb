@@ -53,6 +53,14 @@ describe Ablab do
     end
   end
 
+  describe ".on_track" do
+    it "adds a tracking callback" do
+      block = Proc.new {}
+      ab.on_track(&block)
+      expect(ab.callbacks).to eq([block])
+    end
+  end
+
   describe Ablab::Experiment do
     let(:experiment) do
       Ablab::Experiment.new('foo') do; end
@@ -150,62 +158,64 @@ describe Ablab do
       end
     end
 
+    let(:request) { double(:request) }
+
     let(:run) do
-      Ablab::Run.new(experiment, '86wfd8w6df')
+      Ablab::Run.new(experiment, '86wfd8w6df', request)
     end
 
     it 'gets assigned to the right group' do
-      run = Ablab::Run.new(experiment, 0)
+      run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 0
       expect(run).to be_in_group(:control)
-      run = Ablab::Run.new(experiment, 0)
+      run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 334
       expect(run).to be_in_group(:a)
-      run = Ablab::Run.new(experiment, 0)
+      run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 999
       expect(run).to be_in_group(:b)
     end
 
     it 'assigns the same session ID to the same group' do
-      run1 = Ablab::Run.new(experiment, 'foobar')
-      run2 = Ablab::Run.new(experiment, 'foobar')
+      run1 = Ablab::Run.new(experiment, 'abc', request)
+      run2 = Ablab::Run.new(experiment, 'abc', request)
       expect(run1.group).to eq(run2.group)
     end
 
     it 'selects only the given percentage of users' do
       experiment.percentage_of_visitors 30
-      run = Ablab::Run.new(experiment, 0)
+      run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 0
       expect(run).to be_in_group(:control)
-      run = Ablab::Run.new(experiment, 0)
+      run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 100
       expect(run).to be_in_group(:a)
-      run = Ablab::Run.new(experiment, 0)
+      run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 200
       expect(run).to be_in_group(:b)
-      run = Ablab::Run.new(experiment, 0)
+      run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 300
       expect(run.group).to be_nil
     end
 
     describe "#draw" do
       it "is stable across ruby processes" do
-        d1 = Ablab::Run.new(experiment, '8asd7f8asf7').draw
+        d1 = Ablab::Run.new(experiment, '8asd7f8asf7', request).draw
         dir = File.expand_path(File.dirname(__FILE__), '../lib')
-        d2 = `bundle exec ruby -I#{dir} -e "require 'ablab'; require 'ostruct'; puts Ablab::Run.new(OpenStruct.new(name: :foo), '8asd7f8asf7').draw"`
+        d2 = `bundle exec ruby -I#{dir} -e "require 'ablab'; require 'ostruct'; puts Ablab::Run.new(OpenStruct.new(name: :foo), '8asd7f8asf7', nil).draw"`
         expect(d1).to eq(d2.to_i)
       end
 
       it "returns an integer number < 1000" do
         expect(
-          (0..100).map { |i| Ablab::Run.new(experiment, "#{i}").draw }.all? { |x| x.is_a?(Integer) && x < 1000 }
+          (0..100).map { |i| Ablab::Run.new(experiment, "#{i}", request).draw }.all? { |x| x.is_a?(Integer) && x < 1000 }
         ).to be(true)
       end
     end
 
     describe "#group" do
       it "returns one of the groups" do
-        expect(Ablab::Run.new(experiment, rand(12345).to_s).group).to be_in([:a, :b, :control])
+        expect(Ablab::Run.new(experiment, rand(12345).to_s, request).group).to be_in([:a, :b, :control])
       end
     end
 
@@ -218,11 +228,16 @@ describe Ablab do
 
       it "performs callbacks" do
         x = nil
-        experiment.on_track do |event, experiment, group, session|
-          x = [event, experiment, group, session]
+        y = nil
+        allow(Ablab).to receive(:callbacks) {
+          [ -> (*args) { y = args } ]
+        }
+        experiment.on_track do |event, experiment, group, session, request|
+          x = [event, experiment, group, session, request]
         end
         run.track_view!
-        expect(x).to eq([:view, :foo, run.group, run.session_id])
+        expect(x).to eq([:view, :foo, run.group, run.session_id, request])
+        expect(y).to eq([:view, :foo, run.group, run.session_id, request])
       end
     end
 
@@ -235,11 +250,16 @@ describe Ablab do
 
       it "performs callbacks" do
         x = nil
-        experiment.on_track do |event, experiment, group, session|
-          x = [event, experiment, group, session]
+        y = nil
+        allow(Ablab).to receive(:callbacks) {
+          [ -> (*args) { y = args } ]
+        }
+        experiment.on_track do |event, experiment, group, session, request|
+          x = [event, experiment, group, session, request]
         end
         run.track_success!
-        expect(x).to eq([:success, :foo, run.group, run.session_id])
+        expect(x).to eq([:success, :foo, run.group, run.session_id, request])
+        expect(y).to eq([:success, :foo, run.group, run.session_id, request])
       end
     end
   end

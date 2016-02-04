@@ -39,6 +39,14 @@ module Ablab
       end
       @dashboard_credentials
     end
+
+    def on_track(&block)
+      (@callbacks ||= []) << block
+    end
+
+    def callbacks
+      @callbacks || []
+    end
   end
 
   class InvalidCredentials < ArgumentError; end
@@ -85,16 +93,16 @@ module Ablab
       @result.data
     end
 
-    def run(session_id)
-      Run.new(self, session_id)
+    def run(session_id, request)
+      Run.new(self, session_id, request)
     end
   end
 
   class Run
-    attr_reader :experiment, :session_id
+    attr_reader :experiment, :session_id, :request
 
-    def initialize(experiment, session_id)
-      @experiment, @session_id = experiment, session_id
+    def initialize(experiment, session_id, request)
+      @experiment, @session_id, @request = experiment, session_id, request
     end
 
     def in_group?(name)
@@ -126,7 +134,10 @@ module Ablab
 
     def perform_callbacks!(event)
       experiment.callbacks.each do |cbk|
-        cbk.call(event, experiment.name, group, session_id)
+        cbk.call(event, experiment.name, group, session_id, request)
+      end
+      Ablab.callbacks.each do |cbk|
+        cbk.call(event, experiment.name, group, session_id, request)
       end
     end
   end

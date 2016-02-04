@@ -4,6 +4,8 @@ require 'ostruct'
 describe Ablab::Helper do
   let(:cookies) { Hash.new }
 
+  let(:request) { double(:request) }
+
   let(:controller) do
     Class.new do
       include Ablab::Helper
@@ -21,6 +23,10 @@ describe Ablab::Helper do
         group :b
       end
     end
+  end
+
+  before do
+    allow(controller).to receive(:request).and_return(request)
   end
 
   it 'calls helper_method if the including class implements it' do

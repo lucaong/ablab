@@ -17,7 +17,7 @@ module Ablab
         raise "No experiment with name #{name}"
       end
       @experiments[name] ||=
-        Ablab.experiments[name].run(ablab_session_id)
+        Ablab.experiments[name].run(ablab_session_id, request)
     end
 
     def ablab_session_id
