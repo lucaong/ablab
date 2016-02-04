@@ -111,12 +111,16 @@ module Ablab
 
     def track_view!
       Ablab.tracker.track_view!(experiment.name, group, session_id)
-      perform_callbacks!(:view)
+      Thread.new do
+        perform_callbacks!(:view)
+      end
     end
 
     def track_success!
       Ablab.tracker.track_success!(experiment.name, group, session_id)
-      perform_callbacks!(:success)
+      Thread.new do
+        perform_callbacks!(:success)
+      end
     end
 
     def group

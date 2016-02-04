@@ -242,7 +242,7 @@ describe Ablab do
         experiment.on_track do |event, experiment, group, session, request|
           x = [event, experiment, group, session, request]
         end
-        run.track_view!
+        run.track_view!.join
         expect(x).to eq([:view, :foo, run.group, run.session_id, request])
         expect(y).to eq([:view, :foo, run.group, run.session_id, request])
       end
@@ -264,7 +264,7 @@ describe Ablab do
         experiment.on_track do |event, experiment, group, session, request|
           x = [event, experiment, group, session, request]
         end
-        run.track_success!
+        run.track_success!.join
         expect(x).to eq([:success, :foo, run.group, run.session_id, request])
         expect(y).to eq([:success, :foo, run.group, run.session_id, request])
       end
