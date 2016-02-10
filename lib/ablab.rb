@@ -44,6 +44,14 @@ module Ablab
       (@callbacks ||= []) << block
     end
 
+    def on_tracking_exception(&block)
+      @tracking_exception_handler = block
+    end
+
+    def tracking_exception_handler
+      @tracking_exception_handler || Proc.new { |e| raise e }
+    end
+
     def callbacks
       @callbacks || []
     end
@@ -114,6 +122,8 @@ module Ablab
       Thread.new do
         perform_callbacks!(:view)
       end
+    rescue => e
+      Ablab.tracking_exception_handler.call(e)
     end
 
     def track_success!
@@ -121,6 +131,8 @@ module Ablab
       Thread.new do
         perform_callbacks!(:success)
       end
+    rescue => e
+      Ablab.tracking_exception_handler.call(e)
     end
 
     def group

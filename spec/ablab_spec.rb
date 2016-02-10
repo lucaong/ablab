@@ -61,6 +61,14 @@ describe Ablab do
     end
   end
 
+  describe ".on_tracking_exception" do
+    it "adds a tracking exception handler" do
+      p = Proc.new {}
+      ab.on_tracking_exception(&p)
+      expect(ab.tracking_exception_handler).to be(p)
+    end
+  end
+
   describe Ablab::Experiment do
     let(:experiment) do
       Ablab::Experiment.new('foo') do; end
@@ -246,6 +254,15 @@ describe Ablab do
         expect(x).to eq([:view, :foo, run.group, run.session_id, request])
         expect(y).to eq([:view, :foo, run.group, run.session_id, request])
       end
+
+      it "call exception handler if given" do
+        exception = nil
+        allow(Ablab.tracker).to receive(:track_view!) { raise "Boom!" }
+        allow(Ablab).to receive(:tracking_exception_handler)
+          .and_return(Proc.new { |e| exception = e })
+        expect { run.track_view! }.to_not raise_error
+        expect(exception).to be_a(StandardError)
+      end
     end
 
     describe "#track_success!" do
@@ -267,6 +284,15 @@ describe Ablab do
         run.track_success!.join
         expect(x).to eq([:success, :foo, run.group, run.session_id, request])
         expect(y).to eq([:success, :foo, run.group, run.session_id, request])
+      end
+
+      it "call exception handler if given" do
+        exception = nil
+        allow(Ablab.tracker).to receive(:track_success!) { raise "Boom!" }
+        allow(Ablab).to receive(:tracking_exception_handler)
+          .and_return(Proc.new { |e| exception = e })
+        expect { run.track_success! }.to_not raise_error
+        expect(exception).to be_a(StandardError)
       end
     end
   end

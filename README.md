@@ -93,6 +93,11 @@ Ablab.setup do
   on_track do |event, experiment_name, group_name, ablab_id, request|
     # ...do something
   end
+
+  # Setup a handler for tracking exceptions, so they don't crash the app
+  on_tracking_exception do |exception|
+    puts exception.message
+  end
 end
 ```
 
