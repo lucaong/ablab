@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ablab (0.2.8)
+    ablab (0.2.9)
       rails (~> 4.2.5)
       redis
 
