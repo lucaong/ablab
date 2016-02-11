@@ -100,9 +100,10 @@ Ablab.setup do
   end
 
   # Setup a filter for tracking
-  tracking_filter do |experiment_name, group_name, ablab_id, request|
+  allow_tracking do |experiment_name, group_name, ablab_id, request|
     # return false to disable tracking for this request
     return false if request.headers['User-Agent'].include?('bot')
+    true
   end
 end
 ```
