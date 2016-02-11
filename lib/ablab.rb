@@ -161,14 +161,17 @@ module Ablab
 
     private def forced_group
       return nil unless request && request.respond_to?(:params)
-      forced = request.params[:ablab_group]
-      return nil unless forced
-      hash = forced.split(/\s*,\s*/).map do |s|
+      groups = parse_groups(request.params[:ablab_group])
+      group  = groups[experiment.name.to_s]
+      group.to_sym if group && experiment.groups.map { |g| g.name.to_s }.include?(group)
+    end
+
+    private def parse_groups(str)
+      return {} unless str
+      hash = str.split(/\s*,\s*/).map do |s|
         exp_group = s.split(/\s*:\s*/).take(2)
         exp_group if exp_group.size == 2
       end.compact.to_h
-      group = hash[experiment.name.to_s]
-      group.to_sym if group && experiment.groups.map { |g| g.name.to_s }.include?(group)
     end
 
     private def track!(event)
