@@ -69,6 +69,15 @@ describe Ablab do
     end
   end
 
+  describe ".allow_tracking" do
+    it "sets and return allow_tracking" do
+      block = Proc.new {}
+      filter = ab.allow_tracking(&block)
+      expect(filter).to eq(block)
+      expect(ab.allow_tracking).to eq(block)
+    end
+  end
+
   describe Ablab::Experiment do
     let(:experiment) do
       Ablab::Experiment.new('foo') do; end
@@ -274,6 +283,13 @@ describe Ablab do
         expect { run.track_view!.join }.to_not raise_error
         expect(exception).to be_a(StandardError)
       end
+
+      it "does nothing if allow_tracking returns false" do
+        allow(Ablab).to receive(:allow_tracking) { Proc.new { false } }
+        expect(Ablab.tracker).to_not receive(:track_view!)
+        expect(run).to_not receive(:perform_callbacks!)
+        run.track_view!
+      end
     end
 
     describe "#track_success!" do
@@ -315,6 +331,13 @@ describe Ablab do
           .and_return(Proc.new { |e| exception = e })
         expect { run.track_success!.join }.to_not raise_error
         expect(exception).to be_a(StandardError)
+      end
+
+      it "does nothing if allow_tracking returns false" do
+        allow(Ablab).to receive(:allow_tracking) { Proc.new { false } }
+        expect(Ablab.tracker).to_not receive(:track_success!)
+        expect(run).to_not receive(:perform_callbacks!)
+        run.track_success!
       end
     end
   end

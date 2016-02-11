@@ -98,6 +98,12 @@ Ablab.setup do
   on_tracking_exception do |exception|
     puts exception.message
   end
+
+  # Setup a filter for tracking
+  tracking_filter do |experiment_name, group_name, ablab_id, request|
+    # return false to disable tracking for this request
+    return false if request.headers['User-Agent'].include?('bot')
+  end
 end
 ```
 

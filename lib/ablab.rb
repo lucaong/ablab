@@ -6,6 +6,9 @@ require "forwardable"
 
 module Ablab
   module ModuleMethods
+    TRACKING_EXCEPTION_HANDLER = Proc.new { |e| raise e }
+    ALLOW_TRACKING = Proc.new { true }
+
     attr_reader :experiments
 
     def setup(&block)
@@ -44,12 +47,17 @@ module Ablab
       (@callbacks ||= []) << block
     end
 
+    def allow_tracking(&block)
+      @allow_tracking = block if block_given?
+      @allow_tracking || ALLOW_TRACKING
+    end
+
     def on_tracking_exception(&block)
       @tracking_exception_handler = block
     end
 
     def tracking_exception_handler
-      @tracking_exception_handler || Proc.new { |e| raise e }
+      @tracking_exception_handler || TRACKING_EXCEPTION_HANDLER
     end
 
     def callbacks
@@ -118,21 +126,11 @@ module Ablab
     end
 
     def track_view!
-      Ablab.tracker.track_view!(experiment.name, group, session_id)
-      Thread.new do
-        perform_callbacks!(:view)
-      end
-    rescue => e
-      Ablab.tracking_exception_handler.call(e)
+      track!(:view)
     end
 
     def track_success!
-      Ablab.tracker.track_success!(experiment.name, group, session_id)
-      Thread.new do
-        perform_callbacks!(:success)
-      end
-    rescue => e
-      Ablab.tracking_exception_handler.call(e)
+      track!(:success)
     end
 
     def group
@@ -171,6 +169,23 @@ module Ablab
       end.compact.to_h
       group = hash[experiment.name.to_s]
       group.to_sym if group && experiment.groups.map { |g| g.name.to_s }.include?(group)
+    end
+
+    private def track!(event)
+      if allowed?(experiment.name, group, session_id, request)
+        method = (event == :view) ? :track_view! : :track_success!
+        Ablab.tracker.send(method, experiment.name, group, session_id)
+        Thread.new do
+          perform_callbacks!(event)
+        end
+      end
+    rescue => e
+      Ablab.tracking_exception_handler.call(e)
+    end
+
+    private def allowed?(experiment_name, group, session_id, request)
+      filter = Ablab.allow_tracking
+      filter.call(experiment_name, group, session_id, request)
     end
   end
 
