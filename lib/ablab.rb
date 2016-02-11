@@ -158,6 +158,8 @@ module Ablab
       Ablab.callbacks.each do |cbk|
         cbk.call(event, experiment.name, group, session_id, request)
       end
+    rescue => e
+      Ablab.tracking_exception_handler.call(e)
     end
 
     private def forced_group

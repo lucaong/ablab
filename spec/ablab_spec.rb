@@ -255,12 +255,23 @@ describe Ablab do
         expect(y).to eq([:view, :foo, run.group, run.session_id, request])
       end
 
-      it "call exception handler if given" do
+      it "calls exception handler if given" do
         exception = nil
         allow(Ablab.tracker).to receive(:track_view!) { raise "Boom!" }
         allow(Ablab).to receive(:tracking_exception_handler)
           .and_return(Proc.new { |e| exception = e })
         expect { run.track_view! }.to_not raise_error
+        expect(exception).to be_a(StandardError)
+      end
+
+      it "calls exception handler if callback fails" do
+        exception = nil
+        allow(Ablab).to receive(:callbacks) {
+          [ -> (*args) { raise "boom!" } ]
+        }
+        allow(Ablab).to receive(:tracking_exception_handler)
+          .and_return(Proc.new { |e| exception = e })
+        expect { run.track_view!.join }.to_not raise_error
         expect(exception).to be_a(StandardError)
       end
     end
@@ -286,12 +297,23 @@ describe Ablab do
         expect(y).to eq([:success, :foo, run.group, run.session_id, request])
       end
 
-      it "call exception handler if given" do
+      it "calls exception handler if given" do
         exception = nil
         allow(Ablab.tracker).to receive(:track_success!) { raise "Boom!" }
         allow(Ablab).to receive(:tracking_exception_handler)
           .and_return(Proc.new { |e| exception = e })
         expect { run.track_success! }.to_not raise_error
+        expect(exception).to be_a(StandardError)
+      end
+
+      it "calls exception handler if callback fails" do
+        exception = nil
+        allow(Ablab).to receive(:callbacks) {
+          [ -> (*args) { raise "boom!" } ]
+        }
+        allow(Ablab).to receive(:tracking_exception_handler)
+          .and_return(Proc.new { |e| exception = e })
+        expect { run.track_success!.join }.to_not raise_error
         expect(exception).to be_a(StandardError)
       end
     end
