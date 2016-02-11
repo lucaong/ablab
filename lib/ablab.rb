@@ -135,9 +135,8 @@ module Ablab
 
     def group
       return @group unless @group.nil?
-      if forced = forced_group
-        return forced
-      end
+      forced = forced_group
+      return forced if forced
       size = 1000.0 * (experiment.percentage_of_visitors) / 100.0
       idx = (draw * experiment.groups.size / size).floor
       @group = experiment.groups[idx].try(:name)
@@ -162,7 +161,8 @@ module Ablab
 
     private def forced_group
       return nil unless request && request.respond_to?(:params)
-      return nil unless forced = request.params[:ablab_group]
+      forced = request.params[:ablab_group]
+      return nil unless forced
       hash = forced.split(/\s*,\s*/).map do |s|
         exp_group = s.split(/\s*:\s*/).take(2)
         exp_group if exp_group.size == 2
