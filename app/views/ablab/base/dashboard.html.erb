@@ -48,7 +48,12 @@
           <td><%= format_number results[:sessions] %></td>
           <td><%= format_number results[:successes] %></td>
           <td><%= format_number results[:conversions] %></td>
-          <td><%= format_ratio results[:conversions].to_f, results[:sessions] %></td>
+          <td>
+            <%= format_percentage results[:conversions].to_f, results[:sessions] %>
+            <% unless results[:control] %>
+              <em>(<%= cr_gain(results, experiment.results[:control]) %>)</em>
+            <% end %>
+          </td>
           <td><%= format_decimal results[:z_score] %></td>
           <td><%= confidence results[:z_score] %></td>
         </tr>
