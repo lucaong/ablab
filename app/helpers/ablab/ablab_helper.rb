@@ -49,7 +49,7 @@ module Ablab
     def winner(experiment)
       @winners ||= {}
       return @winners[experiment.name] if @winners.has_key?(experiment.name)
-      winner_name, winner_results = experiment.results.max_by do |(_, r)|
+      winner_name, winner_results = @results[experiment.name].max_by do |(_, r)|
         if r[:sessions] > 0
           r[:conversions].to_f / r[:sessions]
         else

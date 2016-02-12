@@ -40,7 +40,7 @@
             conversion rate, compared to the control group</i>
         </th>
       </tr>
-      <% experiment.results.each do |group_name, results| %>
+      <% @results[experiment.name].each do |group_name, results| %>
         <tr class="<%= 'winner' if winner?(experiment, group_name) %> <%= 'control' if results[:control] %>">
           <td title="<%= results[:description] %>"><b><%= group_name.to_s.titleize %></b></td>
           <td><%= results[:description] %></td>
@@ -51,7 +51,7 @@
           <td>
             <%= format_percentage results[:conversions].to_f, results[:sessions] %>
             <% unless results[:control] %>
-              <em>(<%= cr_gain(results, experiment.results[:control]) %>)</em>
+              <em>(<%= cr_gain(results, @results[experiment.name][:control]) %>)</em>
             <% end %>
           </td>
           <td><%= format_decimal results[:z_score] %></td>

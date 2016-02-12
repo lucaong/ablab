@@ -20,6 +20,10 @@ module Ablab
 
     def dashboard
       @experiments = Ablab.experiments
+      @results     = Ablab.experiments.reduce({}) do |h, (name, experiment)|
+        h[name] = experiment.results
+        h
+      end
     end
   end
 end
