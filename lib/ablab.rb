@@ -9,7 +9,9 @@ module Ablab
     TRACKING_EXCEPTION_HANDLER = Proc.new { |e| raise e }
     ALLOW_TRACKING = Proc.new { true }
 
-    attr_reader :experiments
+    def experiments
+      @experiments ||= {}
+    end
 
     def setup(&block)
       instance_exec(&block)
