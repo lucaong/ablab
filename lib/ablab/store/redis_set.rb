@@ -2,12 +2,13 @@ require 'redis'
 
 module Ablab
   module Store
-    class Redis
+    class RedisSet
       attr_reader :redis
 
       def initialize(opts = {})
         @key_prefix = opts[:key_prefix] || 'ablab'
         @redis = ::Redis.new(opts)
+        @session_duration = opts[:session_duration] || (60 * 30)
       end
 
       def track_view!(experiment, bucket, session_id)
@@ -23,7 +24,12 @@ module Ablab
       end
 
       def sessions(experiment, bucket)
-        (redis.pfcount(key(:sessions, experiment, bucket)) || 0).to_i
+        s, z = nil, nil
+        redis.multi do
+          s = redis.zcard(key(:sessions, experiment, bucket))
+          z = redis.get(key(:'sessions:spool', experiment, bucket))
+        end
+        (s.value || 0).to_i + (z.value || 0).to_i
       end
 
       def successes(experiment, bucket)
@@ -31,22 +37,29 @@ module Ablab
       end
 
       def conversions(experiment, bucket)
-        (redis.pfcount(key(:conversions, experiment, bucket)) || 0).to_i
+        c, z = nil, nil
+        redis.multi do
+          c = redis.zcard(key(:conversions, experiment, bucket))
+          z = redis.get(key(:'conversions:spool', experiment, bucket))
+        end
+        (c.value || 0).to_i + (z.value || 0).to_i
       end
 
       def counts(experiment, bucket)
-        v, s, x, c = nil, nil, nil, nil
+        v, s, k, x, c, z = nil, nil, nil, nil, nil, nil
         redis.multi do
           v = redis.get(key(:views, experiment, bucket))
-          s = redis.pfcount(key(:sessions, experiment, bucket))
+          s = redis.zcard(key(:sessions, experiment, bucket))
+          k = redis.get(key(:'sessions:spool', experiment, bucket))
           x = redis.get(key(:successes, experiment, bucket))
-          c = redis.pfcount(key(:conversions, experiment, bucket))
+          c = redis.zcard(key(:conversions, experiment, bucket))
+          z = redis.get(key(:'conversions:spool', experiment, bucket))
         end
         {
           views:       (v.value || 0).to_i,
-          sessions:    (s.value || 0).to_i,
+          sessions:    (s.value || 0).to_i + (k.value || 0).to_i,
           successes:   (x.value || 0).to_i,
-          conversions: (c.value || 0).to_i
+          conversions: (c.value || 0).to_i + (z.value || 0).to_i
         }
       end
 
@@ -58,9 +71,16 @@ module Ablab
         return false if bucket.nil?
         redis.pipelined do
           redis.incr(key(counter, experiment, bucket))
-          redis.pfadd(key(set, experiment, bucket), session_id)
+          redis.zadd(key(set, experiment, bucket), Time.now.to_i, session_id)
         end
+        spool_set!(experiment, bucket, set) if rand(100) < 1
+      end
+
+      private def spool_set!(experiment, bucket, set)
+        n = redis.zremrangebyscore(key(set, experiment, bucket), 0, Time.now.to_i - @session_duration)
+        redis.incrby(key("#{set}:spool", experiment, bucket), n)
       end
     end
   end
 end
+
