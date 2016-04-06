@@ -244,6 +244,28 @@ describe Ablab do
       end
     end
 
+    describe "#if_group" do
+      before do
+        allow(run).to receive(:group).and_return(Ablab::Group.new(:foo))
+      end
+
+      it "executes block if the run's group is the given one" do
+        called = false
+        run.if_group(:foo) do
+          called = true
+        end
+        expect(called).to be(true)
+      end
+
+      it "does not execute block if the run's group is not the given one" do
+        called = false
+        run.if_group(:bar) do
+          called = true
+        end
+        expect(called).to be(false)
+      end
+    end
+
     describe "#track_view!" do
       it "tracks the view" do
         expect(Ablab.tracker).to receive(:track_view!)
