@@ -76,7 +76,7 @@ module Ablab
 
     def initialize(name, &block)
       @name      = name.to_sym
-      @control   = Group.new(:control, 'control group')
+      @control   = Group.control
       @groups    = [@control]
       @callbacks = []
       instance_exec(&block)
@@ -141,7 +141,7 @@ module Ablab
       return forced if forced
       size = 1000.0 * (experiment.percentage_of_visitors) / 100.0
       idx = (draw * experiment.groups.size / size).floor
-      @group = experiment.groups[idx].try(:name)
+      @group = experiment.groups[idx]
     end
 
     def draw
@@ -165,7 +165,7 @@ module Ablab
       return nil unless request && request.respond_to?(:params)
       groups = parse_groups(request.params[:ablab_group])
       group  = groups[experiment.name.to_s]
-      group.to_sym if group && experiment.groups.map { |g| g.name.to_s }.include?(group)
+      experiment.groups.find { |g| g == group }
     end
 
     private def parse_groups(str)
@@ -196,8 +196,37 @@ module Ablab
 
   class Group
     attr_reader :name, :description
+    alias_method :eql?, :==
     def initialize(name, description = nil)
       @name, @description = name.to_sym, description
+    end
+
+    def control?
+      name == :control
+    end
+
+    def experimental?
+      !control?
+    end
+
+    def ==(o)
+      if o.is_a?(Symbol)
+        name == o
+      elsif o.is_a?(String)
+        name.to_s == o
+      elsif o.is_a?(self.class)
+        name == o.name && description == o.description
+      else
+        false
+      end
+    end
+
+    def hash
+      name.hash
+    end
+
+    def self.control
+      new(:control, 'control group')
     end
   end
 
