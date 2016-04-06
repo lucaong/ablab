@@ -185,9 +185,11 @@ describe Ablab do
       run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 0
       expect(run).to be_in_group(:control)
+
       run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 334
       expect(run).to be_in_group(:a)
+
       run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 999
       expect(run).to be_in_group(:b)
@@ -201,18 +203,22 @@ describe Ablab do
 
     it 'selects only the given percentage of users' do
       experiment.percentage_of_visitors 30
+
       run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 0
       expect(run).to be_in_group(:control)
+
       run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 100
       expect(run).to be_in_group(:a)
+
       run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 200
       expect(run).to be_in_group(:b)
+
       run = Ablab::Run.new(experiment, 'abc', request)
       allow(run).to receive(:draw).and_return 300
-      expect(run.group).to be_nil
+      expect(run.group).to be_none
     end
 
     describe "#draw" do
@@ -225,14 +231,15 @@ describe Ablab do
 
       it "returns an integer number < 1000" do
         expect(
-          (0..100).map { |i| Ablab::Run.new(experiment, "#{i}", request).draw }.all? { |x| x.is_a?(Integer) && x < 1000 }
-        ).to be(true)
+          (0..100).map { |i| Ablab::Run.new(experiment, "#{i}", request).draw }
+        ).to be_all { |x| x.is_a?(Integer) && x < 1000 }
       end
     end
 
     describe "#group" do
       it "returns one of the groups" do
-        expect([:a, :b, :control]).to include(Ablab::Run.new(experiment, rand(12345).to_s, request).group)
+        group = Ablab::Run.new(experiment, rand(12345).to_s, request).group
+        expect(%i(a b control)).to include(group.name)
       end
 
       it "returns the forced group, if set with the 'ablab_group' param" do
@@ -240,7 +247,7 @@ describe Ablab do
         allow(request).to receive(:params).and_return(params)
         run = Ablab::Run.new(experiment, '6q5wed', request)
         expect(run.group).to be_a(Ablab::Group)
-        expect(run.group).to eq(:a)
+        expect(run.group).to be_named(:a)
       end
     end
 
@@ -346,46 +353,69 @@ describe Ablab do
   describe Ablab::Group do
     let(:control_group) { Ablab::Group.new(:control, "control group") }
     let(:experimental_group) { Ablab::Group.new(:foo, "foo group") }
+    let(:none_group) { Ablab::Group.new(nil, "no group") }
 
     describe "#control?" do
       it 'is true for the control group' do
-        expect(control_group.control?).to be true
+        expect(control_group).to be_control
       end
 
       it 'is false for other groups' do
-        expect(experimental_group.control?).to be false
+        expect(experimental_group).not_to be_control
+      end
+
+      it 'is false for none group' do
+        expect(none_group).not_to be_control
       end
     end
 
     describe "#experimental?" do
       it 'is false for the control group' do
-        expect(control_group.experimental?).to be false
+        expect(control_group).not_to be_experimental
       end
 
       it 'is true for other groups' do
-        expect(experimental_group.experimental?).to be true
+        expect(experimental_group).to be_experimental
+      end
+
+      it 'is false for none group' do
+        expect(none_group).not_to be_experimental
       end
     end
 
-    describe "#==" do
+    describe "#none?" do
+      it 'is false for the control group' do
+        expect(control_group).not_to be_none
+      end
+
+      it 'is true for other groups' do
+        expect(experimental_group).not_to be_none
+      end
+
+      it 'is false for none group' do
+        expect(none_group).to be_none
+      end
+    end
+
+    describe '#named?' do
       it 'accepts comparison to Symbol instances' do
-        expect(control_group).to eq(:control)
-        expect(control_group).not_to eq(:foo)
+        expect(control_group).to be_named(:control)
+        expect(control_group).not_to be_named(:foo)
       end
 
       it 'accepts comparison to String instances' do
-        expect(control_group).to eq('control')
-        expect(control_group).not_to eq('foo')
+        expect(control_group).to be_named('control')
+        expect(control_group).not_to be_named('foo')
       end
 
       it 'accepts comparison to Ablab::Group instances' do
-        expect(control_group).to eq(control_group)
-        expect(control_group).to eq(Ablab::Group.new(:control, "control group"))
-        expect(control_group).not_to eq(experimental_group)
+        expect(control_group).to be_named(control_group)
+        expect(control_group).to be_named(Ablab::Group.new(:control, "control group"))
+        expect(control_group).not_to be_named(experimental_group)
       end
 
       it 'is false for everyhing else' do
-        expect(control_group).not_to eq(Object.new)
+        expect(control_group).not_to be_named(Object.new)
       end
     end
   end

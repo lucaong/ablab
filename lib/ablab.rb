@@ -124,7 +124,7 @@ module Ablab
     end
 
     def in_group?(name)
-      group == name
+      group.named?(name)
     end
 
     def track_view!
@@ -141,7 +141,7 @@ module Ablab
       return forced if forced
       size = 1000.0 * (experiment.percentage_of_visitors) / 100.0
       idx = (draw * experiment.groups.size / size).floor
-      @group = experiment.groups[idx]
+      @group = experiment.groups[idx] || Group.none
     end
 
     def draw
@@ -163,9 +163,9 @@ module Ablab
 
     private def forced_group
       return nil unless request && request.respond_to?(:params)
-      groups = parse_groups(request.params[:ablab_group])
-      group  = groups[experiment.name.to_s]
-      experiment.groups.find { |g| g == group }
+      parsed_groups = parse_groups(request.params[:ablab_group])
+      group_name    = parsed_groups[experiment.name.to_s]
+      experiment.groups.find { |g| g.named?(group_name) }
     end
 
     private def parse_groups(str)
@@ -196,26 +196,31 @@ module Ablab
 
   class Group
     attr_reader :name, :description
-    alias_method :eql?, :==
+
     def initialize(name, description = nil)
-      @name, @description = name.to_sym, description
+      @name, @description = name.try(:to_sym), description
     end
 
     def control?
-      name == :control
+      named?(:control)
     end
 
     def experimental?
-      !control?
+      !(control? || none?)
     end
 
-    def ==(o)
-      if o.is_a?(Symbol)
+    def none?
+      name.blank?
+    end
+
+    def named?(o)
+      case o
+      when Symbol
         name == o
-      elsif o.is_a?(String)
+      when String
         name.to_s == o
-      elsif o.is_a?(self.class)
-        name == o.name && description == o.description
+      when self.class
+        name == o.name
       else
         false
       end
@@ -227,6 +232,10 @@ module Ablab
 
     def self.control
       new(:control, 'control group')
+    end
+
+    def self.none
+      new(nil, "no group")
     end
   end
 
