@@ -98,7 +98,7 @@ module Ablab
     end
 
     def group(name, options = {})
-      group = Group.new(name, options[:description])
+      group = Group.new(name, options[:description], options[:weight])
       @groups << group
     end
 
@@ -137,17 +137,23 @@ module Ablab
 
     def group
       return @group unless @group.nil?
-      forced = forced_group
-      return forced if forced
-      size = 1000.0 * (experiment.percentage_of_visitors) / 100.0
-      idx = (draw * experiment.groups.size / size).floor
-      @group = experiment.groups[idx]
+      if forced = forced_group
+        return forced
+      end
+      d = draw / experiment.percentage_of_visitors
+      return nil if d >= 1
+      tot_weight = experiment.groups.map(&:weight).reduce(:+).to_f
+      @group = experiment.groups.reduce(0) do |t, group|
+        t += group.weight / tot_weight
+        break group if d < t
+        t
+      end
     end
 
     def draw
       sid_hash = Digest::SHA1.hexdigest(session_id)[-8..-1].to_i(16)
       exp_hash = Digest::SHA1.hexdigest(experiment.name.to_s)[-8..-1].to_i(16)
-      (sid_hash ^ exp_hash) % 1000
+      ((sid_hash ^ exp_hash) % 1000) / 10.0
     end
 
     def perform_callbacks!(event)
@@ -195,10 +201,11 @@ module Ablab
   end
 
   class Group
-    attr_reader :name, :description
+    attr_reader :name, :description, :weight
     alias_method :eql?, :==
-    def initialize(name, description = nil)
+    def initialize(name, description = nil, weight = nil)
       @name, @description = name.to_sym, description
+      @weight = weight || 1
     end
 
     def control?

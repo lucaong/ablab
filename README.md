@@ -81,11 +81,14 @@ Ablab.setup do
   experiment :search do
     description 'Search experiments'
 
-    # You can restrict the experiment only to a certain percentage of users (the
-    # groups will still be equally sized within the given percentage)
+    # You can restrict participation to the experiment only to a certain
+    # percentage of users. Users that are not participating will have a nil
+    # group for this experiment
     percentage_of_visitors 20
 
-    group :ctr, description: 'boost by CTR'
+    # You can affect the size of a group by assigning it a weight. In this case
+    # the group :ctr will be 3 times bigger than the others
+    group :ctr, description: 'boost by CTR', weight: 3
     group :gmv, description: 'boost by GMV'
   end
 
