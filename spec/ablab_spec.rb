@@ -186,10 +186,26 @@ describe Ablab do
       allow(run).to receive(:draw).and_return 0
       expect(run).to be_in_group(:control)
       run = Ablab::Run.new(experiment, 'abc', request)
-      allow(run).to receive(:draw).and_return 334
+      allow(run).to receive(:draw).and_return 33.4
       expect(run).to be_in_group(:a)
       run = Ablab::Run.new(experiment, 'abc', request)
-      allow(run).to receive(:draw).and_return 999
+      allow(run).to receive(:draw).and_return 99.9
+      expect(run).to be_in_group(:b)
+    end
+
+    it 'respects group weights' do
+      experiment = Ablab::Experiment.new(:foo) do
+        group :a
+        group :b, weight: 2
+      end
+      run = Ablab::Run.new(experiment, 'abc', request)
+      allow(run).to receive(:draw).and_return 24.0
+      expect(run).to be_in_group(:control)
+      run = Ablab::Run.new(experiment, 'abc', request)
+      allow(run).to receive(:draw).and_return 25.0
+      expect(run).to be_in_group(:a)
+      run = Ablab::Run.new(experiment, 'abc', request)
+      allow(run).to receive(:draw).and_return 50.0
       expect(run).to be_in_group(:b)
     end
 
@@ -202,16 +218,16 @@ describe Ablab do
     it 'selects only the given percentage of users' do
       experiment.percentage_of_visitors 30
       run = Ablab::Run.new(experiment, 'abc', request)
-      allow(run).to receive(:draw).and_return 0
+      allow(run).to receive(:draw).and_return 0.0
       expect(run).to be_in_group(:control)
       run = Ablab::Run.new(experiment, 'abc', request)
-      allow(run).to receive(:draw).and_return 100
+      allow(run).to receive(:draw).and_return 10.0
       expect(run).to be_in_group(:a)
       run = Ablab::Run.new(experiment, 'abc', request)
-      allow(run).to receive(:draw).and_return 200
+      allow(run).to receive(:draw).and_return 20.0
       expect(run).to be_in_group(:b)
       run = Ablab::Run.new(experiment, 'abc', request)
-      allow(run).to receive(:draw).and_return 300
+      allow(run).to receive(:draw).and_return 30.0
       expect(run.group).to be_nil
     end
 
@@ -220,12 +236,12 @@ describe Ablab do
         d1 = Ablab::Run.new(experiment, '8asd7f8asf7', request).draw
         dir = File.expand_path(File.dirname(__FILE__), '../lib')
         d2 = `bundle exec ruby -I#{dir} -e "require 'ablab'; require 'ostruct'; puts Ablab::Run.new(OpenStruct.new(name: :foo), '8asd7f8asf7', nil).draw"`
-        expect(d1).to eq(d2.to_i)
+        expect(d1).to eq(d2.to_f)
       end
 
-      it "returns an integer number < 1000" do
+      it "returns an float number < 100" do
         expect(
-          (0..100).map { |i| Ablab::Run.new(experiment, "#{i}", request).draw }.all? { |x| x.is_a?(Integer) && x < 1000 }
+          (0..100).map { |i| Ablab::Run.new(experiment, "#{i}", request).draw }.all? { |x| x.is_a?(Float) && x < 100 }
         ).to be(true)
       end
     end
