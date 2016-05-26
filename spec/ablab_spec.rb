@@ -248,14 +248,13 @@ describe Ablab do
 
     describe "#group" do
       it "returns one of the groups" do
-        expect([:a, :b, :control]).to include(Ablab::Run.new(experiment, rand(12345).to_s, request).group)
+        expect(Ablab::Run.new(experiment, rand(12345).to_s, request).group).to be_in([:a, :b, :control])
       end
 
       it "returns the forced group, if set with the 'ablab_group' param" do
         params = { ablab_group: 'bar:baz,foo:a' }
         allow(request).to receive(:params).and_return(params)
         run = Ablab::Run.new(experiment, '6q5wed', request)
-        expect(run.group).to be_a(Ablab::Group)
         expect(run.group).to eq(:a)
       end
     end
@@ -355,53 +354,6 @@ describe Ablab do
         expect(Ablab.tracker).to_not receive(:track_success!)
         expect(run).to_not receive(:perform_callbacks!)
         run.track_success!
-      end
-    end
-  end
-
-  describe Ablab::Group do
-    let(:control_group) { Ablab::Group.new(:control, "control group") }
-    let(:experimental_group) { Ablab::Group.new(:foo, "foo group") }
-
-    describe "#control?" do
-      it 'is true for the control group' do
-        expect(control_group.control?).to be true
-      end
-
-      it 'is false for other groups' do
-        expect(experimental_group.control?).to be false
-      end
-    end
-
-    describe "#experimental?" do
-      it 'is false for the control group' do
-        expect(control_group.experimental?).to be false
-      end
-
-      it 'is true for other groups' do
-        expect(experimental_group.experimental?).to be true
-      end
-    end
-
-    describe "#==" do
-      it 'accepts comparison to Symbol instances' do
-        expect(control_group).to eq(:control)
-        expect(control_group).not_to eq(:foo)
-      end
-
-      it 'accepts comparison to String instances' do
-        expect(control_group).to eq('control')
-        expect(control_group).not_to eq('foo')
-      end
-
-      it 'accepts comparison to Ablab::Group instances' do
-        expect(control_group).to eq(control_group)
-        expect(control_group).to eq(Ablab::Group.new(:control, "control group"))
-        expect(control_group).not_to eq(experimental_group)
-      end
-
-      it 'is false for everyhing else' do
-        expect(control_group).not_to eq(Object.new)
       end
     end
   end

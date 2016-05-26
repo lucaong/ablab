@@ -76,7 +76,7 @@ module Ablab
 
     def initialize(name, &block)
       @name      = name.to_sym
-      @control   = Group.control
+      @control   = Group.new(:control, 'control group')
       @groups    = [@control]
       @callbacks = []
       instance_exec(&block)
@@ -147,7 +147,7 @@ module Ablab
         t += group.weight / tot_weight
         break group if d < t
         t
-      end
+      end.try(:name)
     end
 
     def draw
@@ -171,7 +171,7 @@ module Ablab
       return nil unless request && request.respond_to?(:params)
       groups = parse_groups(request.params[:ablab_group])
       group  = groups[experiment.name.to_s]
-      experiment.groups.find { |g| g == group }
+      group.to_sym if group && experiment.groups.map { |g| g.name.to_s }.include?(group)
     end
 
     private def parse_groups(str)
@@ -202,38 +202,10 @@ module Ablab
 
   class Group
     attr_reader :name, :description, :weight
-    alias_method :eql?, :==
+
     def initialize(name, description = nil, weight = nil)
       @name, @description = name.to_sym, description
       @weight = weight || 1
-    end
-
-    def control?
-      name == :control
-    end
-
-    def experimental?
-      !control?
-    end
-
-    def ==(o)
-      if o.is_a?(Symbol)
-        name == o
-      elsif o.is_a?(String)
-        name.to_s == o
-      elsif o.is_a?(self.class)
-        name == o.name && description == o.description
-      else
-        false
-      end
-    end
-
-    def hash
-      name.hash
-    end
-
-    def self.control
-      new(:control, 'control group')
     end
   end
 
