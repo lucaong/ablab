@@ -12,7 +12,15 @@ var Ablab = (function(scripts) {
     _track: function(experiment, evt) {
       var trackerPath = (this.baseURL) + '/track.js';
       var script = document.createElement('script');
-      script.setAttribute('src', trackerPath + '?experiment=' + experiment + '&event=' + evt);
+      var param_str = trackerPath + '?experiment=' + experiment + '&event=' + evt;
+      window.location.search
+        .replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str,key,value) {
+          if (key == 'ablab_group') {
+            param_str = param_str + ' &ablab_group=' + value;
+          }
+        }
+      );
+      script.setAttribute('src', param_str);
       currentScript.parentNode.appendChild(script);
     }
   }
