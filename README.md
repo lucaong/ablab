@@ -160,6 +160,17 @@ http://my_application.com/some_path?ablab_group=experiment_name:group_name
 ![Ablab Dashboard](https://raw.githubusercontent.com/lucaong/ablab/master/dashboard.png)
 
 
+## Using Ablab outside of Rails
+
+In case you want to use `Ablab` in a non-Rails project, you might want to use
+the `ablab-core` gem instead of `ablab`: it is a version of `Ablab` stripped
+out of the Rails engine part, so that it does not depend on Rails anymore.
+Note that `ablab-core` is a pure library version, it does not contain an HTTP
+server nor any JavaScript tracking facility. Also, you would probably have to
+rederfine the `Ablab::Helper.ablab_session_id` method to return (and store) a
+unique session id for the current user.
+
+
 ## Feature Wishlist
 
   - Pause/resume experiments

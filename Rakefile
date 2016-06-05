@@ -18,7 +18,11 @@ load 'rails/tasks/statistics.rake'
 
 require "rspec/core/rake_task"
 
-Bundler::GemHelper.install_tasks
+Bundler::GemHelper.install_tasks(name: 'ablab')
+
+namespace :core do
+  Bundler::GemHelper.install_tasks(name: 'ablab-core')
+end
 
 RSpec::Core::RakeTask.new(:spec)
 task default: :spec
