@@ -150,6 +150,10 @@ module Ablab
       end.try(:name)
     end
 
+    def if_group(name)
+      yield if group == name
+    end
+
     def draw
       sid_hash = Digest::SHA1.hexdigest(session_id)[-8..-1].to_i(16)
       exp_hash = Digest::SHA1.hexdigest(experiment.name.to_s)[-8..-1].to_i(16)
