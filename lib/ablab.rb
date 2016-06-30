@@ -3,6 +3,7 @@ require "ablab/helper"
 require "ablab/store"
 require "ablab/engine"
 require "forwardable"
+require 'mathn'
 
 module Ablab
   module ModuleMethods
